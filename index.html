@@ -27,9 +27,24 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
 .screen.hidden{opacity:0;pointer-events:none;transform:translateY(20px);}
 
 /* ── HOME ── */
-#home{background:radial-gradient(ellipse at 30% 20%,#1e3a5f 0%,var(--bg) 60%);
-  align-items:center;justify-content:center;overflow-y:auto;
-  padding:calc(var(--safe-top) + 10px) 20px calc(var(--safe-bot) + 12px);gap:0;}
+/* Satir & Astro theme: warm orange accent taken from the illustration (home screen only) */
+#home{--gold:#f58a3c;--gold2:#ffb070;
+  background:radial-gradient(ellipse at 30% 10%,#3d2616 0%,var(--bg) 62%);
+  align-items:center;justify-content:flex-start;overflow-y:auto;
+  padding:278px 20px calc(var(--safe-bot) + 12px);gap:0;}
+#home > :first-child{margin-top:0;}
+#home > :last-child{margin-bottom:auto;}
+.home-hero{position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:min(100%,520px);height:290px;pointer-events:none;
+  background:url(satir-astro.webp) center 24%/cover no-repeat;
+  -webkit-mask-image:linear-gradient(to bottom,#000 72%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 72%,transparent 100%);}
+#home .home-badge{border-color:rgba(245,138,60,.4);background:rgba(15,25,35,.55);}
+#home .mode-btn.selected,#home .seg-btn.selected{border-color:var(--gold);
+  background:linear-gradient(135deg,rgba(245,138,60,.16),rgba(77,166,255,.08));}
+#home .home-title{background:linear-gradient(135deg,var(--gold2) 0%,#ff7a2f 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+#home .start-btn{background:linear-gradient(135deg,#ff9a4d 0%,#f07a22 100%);}
 .home-badge{font-family:'Syne Mono',monospace;font-size:.6rem;letter-spacing:3px;
   text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:8px;
   border:1px solid rgba(245,200,66,.3);padding:4px 13px;border-radius:20px;}
@@ -266,7 +281,8 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
 
 <!-- ══════════════ HOME ══════════════ -->
 <div class="screen" id="home">
-  <div class="home-badge">🇪🇸 Práctica de español</div>
+  <div class="home-hero" role="img" aria-label="Satir y Astro, dos gatos en un sofá"></div>
+  <div class="home-badge">🐾 Satir &amp; Astro</div>
   <div class="home-title">Conjuga<br>ES</div>
   <div class="home-sub">Un tiempo por ronda.<br>Domina la conjugación en español.</div>
 
