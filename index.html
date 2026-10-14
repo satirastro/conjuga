@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ConjugaES">
+<meta name="theme-color" content="#0f1923">
+<title>ConjugaES — Spanish Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1923; --surface:#162030; --card:#1c2a3a; --border:#253548;
+  --gold:#f5c842; --gold2:#ffd966; --blue:#4da6ff; --green:#3ddc84;
+  --red:#ff5f5f; --muted:#6b8099; --text:#e8f0fa;
+  --safe-top:env(safe-area-inset-top,44px);
+  --safe-bot:env(safe-area-inset-bottom,34px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
+  font-family:'Syne',sans-serif;overflow:hidden;position:fixed;}
+
+/* SCREENS */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;
+  transition:opacity .3s ease,transform .3s ease;overflow:hidden;}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(20px);}
+
+/* ── HOME ── */
+#home{background:radial-gradient(ellipse at 30% 20%,#1e3a5f 0%,var(--bg) 60%);
+  align-items:center;justify-content:center;overflow-y:auto;
+  padding:calc(var(--safe-top) + 10px) 20px calc(var(--safe-bot) + 12px);gap:0;}
+.home-badge{font-family:'Syne Mono',monospace;font-size:.6rem;letter-spacing:3px;
+  text-transform:uppercase;color:var(--gold);opacity:.8;margin-bottom:8px;
+  border:1px solid rgba(245,200,66,.3);padding:4px 13px;border-radius:20px;}
+.home-title{font-size:2.8rem;font-weight:800;line-height:.95;text-align:center;
+  background:linear-gradient(135deg,var(--gold2) 0%,var(--blue) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.home-sub{font-size:.76rem;color:var(--muted);text-align:center;margin-bottom:16px;line-height:1.5;}
+.section-label{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  width:100%;margin:2px 0 6px;}
+
+.mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:100%;margin-bottom:12px;}
+.mode-btn{background:var(--card);border:1px solid var(--border);border-radius:13px;
+  padding:9px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.mode-btn:active{transform:scale(.96);}
+.mode-btn.selected{border-color:var(--gold);
+  background:linear-gradient(135deg,rgba(245,200,66,.12),rgba(77,166,255,.08));}
+.mode-btn .icon{font-size:1.2rem;}
+.mode-btn .label{font-size:.56rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:center;line-height:1.2;}
+.mode-btn .check{position:absolute;top:4px;right:4px;width:12px;height:12px;
+  border-radius:50%;background:var(--gold);display:none;align-items:center;
+  justify-content:center;font-size:.45rem;color:#000;}
+.mode-btn.selected .check{display:flex;}
+
+.seg{display:flex;gap:7px;width:100%;margin-bottom:12px;}
+.seg-btn{flex:1;padding:10px 4px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;color:var(--text);font-family:'Syne',sans-serif;font-size:.7rem;
+  font-weight:700;cursor:pointer;transition:all .2s;line-height:1.25;}
+.seg-btn.selected{border-color:var(--gold);
+  background:linear-gradient(135deg,rgba(245,200,66,.12),rgba(77,166,255,.08));}
+.seg-btn small{display:block;font-size:.56rem;color:var(--muted);font-weight:400;margin-top:2px;}
+
+.start-btn{width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--gold) 0%,#e6b800 100%);
+  color:#0f1923;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;
+  letter-spacing:1px;border:none;border-radius:15px;cursor:pointer;
+  transition:all .2s;text-transform:uppercase;}
+.start-btn:active{transform:scale(.97);opacity:.9;}
+
+.stats-row{display:flex;gap:8px;margin-top:11px;width:100%;}
+.stat-chip{flex:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:11px;padding:8px;text-align:center;}
+.stat-chip .sv{font-size:1.1rem;font-weight:800;color:var(--gold);}
+.stat-chip .sl{font-size:.54rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+
+.install-home-btn{
+  display:flex;align-items:center;gap:10px;margin-top:10px;width:100%;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:13px;padding:10px 14px;cursor:pointer;transition:all .2s;
+}
+.install-home-btn:active{transform:scale(.97);}
+.ih-icon{font-size:1.1rem;}
+.ih-text{flex:1;text-align:left;}
+.ih-title{font-size:.74rem;font-weight:700;color:var(--text);}
+.ih-sub{font-size:.58rem;color:var(--muted);margin-top:1px;}
+.ih-arrow{font-size:1rem;color:var(--muted);}
+
+/* ── QUIZ ── */
+#quiz{padding-top:var(--safe-top);padding-bottom:var(--safe-bot);}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;padding:11px 17px 7px;}
+.q-back{width:33px;height:33px;border-radius:10px;background:var(--surface);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;cursor:pointer;transition:all .15s;}
+.q-back:active{transform:scale(.9);}
+.progress-wrap{flex:1;margin:0 11px;}
+.progress-bar{height:4px;background:var(--surface);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--blue));
+  border-radius:2px;transition:width .4s ease;}
+.progress-label{font-size:.6rem;color:var(--muted);text-align:right;
+  margin-top:3px;font-family:'Syne Mono',monospace;}
+.streak-badge{display:flex;align-items:center;gap:3px;
+  background:rgba(245,200,66,.15);border:1px solid rgba(245,200,66,.3);
+  border-radius:9px;padding:4px 8px;font-size:.66rem;font-weight:700;color:var(--gold);}
+
+.quiz-card-area{flex:1;display:flex;flex-direction:column;
+  padding:10px 17px;overflow-y:auto;gap:9px;
+  -webkit-overflow-scrolling:touch;}
+
+.tense-tag{display:inline-flex;align-items:center;gap:5px;background:var(--surface);
+  border:1px solid var(--border);border-radius:9px;padding:5px 10px;
+  font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--blue);
+  align-self:flex-start;flex-shrink:0;}
+
+.question-card{background:var(--card);border:1px solid var(--border);
+  border-radius:18px;padding:18px;flex-shrink:0;}
+.question-card.shake{animation:shake .35s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.q-prompt{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:7px;}
+.q-verb{font-size:1.8rem;font-weight:800;color:var(--gold2);line-height:1;}
+.q-meaning{font-size:.7rem;color:var(--muted);margin-top:3px;}
+.q-context{display:flex;align-items:center;gap:9px;margin-top:9px;
+  background:var(--surface);border-radius:9px;padding:8px 12px;}
+.q-pronoun{font-size:.95rem;font-weight:700;color:var(--blue);}
+.q-arrow{color:var(--muted);font-size:.82rem;}
+.q-tense-ctx{font-size:.7rem;color:var(--muted);}
+
+.answer-section{display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+.answer-input-wrap{position:relative;}
+.answer-input{width:100%;padding:13px 48px 13px 15px;
+  background:var(--card);border:2px solid var(--border);border-radius:13px;
+  color:var(--text);font-family:'Syne Mono',monospace;font-size:1rem;
+  outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.answer-input::placeholder{color:var(--muted);}
+.answer-input:focus{border-color:var(--blue);}
+.answer-input.correct{border-color:var(--green);background:rgba(61,220,132,.08);}
+.answer-input.wrong{border-color:var(--red);background:rgba(255,95,95,.08);}
+.submit-inline{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:33px;height:33px;border-radius:8px;background:var(--blue);border:none;
+  color:#fff;font-size:.9rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:all .15s;}
+.submit-inline:active{transform:translateY(-50%) scale(.9);}
+
+.special-chars{flex-shrink:0;}
+.special-chars-label{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.special-chars-row{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;}
+.char-btn{background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  height:42px;color:var(--text);font-family:'Syne Mono',monospace;font-size:1.05rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;
+  transition:transform .08s ease,background .08s ease,border-color .08s ease;}
+.char-btn:active,.char-btn.pressed{background:var(--gold);border-color:var(--gold);color:#0f1923;transform:scale(.9);}
+@media (max-width:360px){.special-chars-row{grid-template-columns:repeat(5,1fr);}}
+
+.feedback-box{border-radius:13px;padding:12px 14px;display:none;animation:feedIn .25s ease;}
+@keyframes feedIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.feedback-box.correct{background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.4);display:block;}
+.feedback-box.wrong{background:rgba(255,95,95,.08);border:1px solid rgba(255,95,95,.3);display:block;}
+.fb-title{font-size:.78rem;font-weight:700;margin-bottom:3px;}
+.feedback-box.correct .fb-title{color:var(--green);}
+.feedback-box.wrong .fb-title{color:var(--red);}
+.fb-your{font-family:'Syne Mono',monospace;font-size:.78rem;color:var(--muted);margin-bottom:2px;}
+.fb-note{font-size:.63rem;color:var(--muted);margin-top:2px;}
+
+.full-conj{display:none;flex-shrink:0;}
+.full-conj.visible{display:block;}
+.full-conj-header{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.full-conj-title{font-size:.64rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:700;}
+.conj-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.conj-table{width:100%;border-collapse:collapse;}
+.conj-table th{background:#0d1a26;color:var(--muted);font-size:.58rem;letter-spacing:1px;
+  text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);}
+.conj-table td{padding:8px 12px;border-bottom:1px solid rgba(37,53,72,.5);vertical-align:middle;}
+.conj-table tr:last-child td{border-bottom:none;}
+.conj-pron{color:var(--blue);font-size:.7rem;font-family:'Syne Mono',monospace;}
+.conj-form{color:var(--text);font-family:'Syne Mono',monospace;font-size:.82rem;}
+.conj-form.target{color:var(--gold2);font-weight:700;}
+.conj-tag{font-size:.6rem;color:var(--red);margin-left:6px;vertical-align:middle;}
+
+.next-btn{width:100%;padding:14px;background:var(--card);border:2px solid var(--border);
+  border-radius:13px;color:var(--text);font-family:'Syne',sans-serif;font-size:.86rem;
+  font-weight:700;cursor:pointer;display:none;transition:all .2s;letter-spacing:.4px;flex-shrink:0;}
+.next-btn.visible{display:block;}
+.next-btn:active{transform:scale(.98);}
+
+/* ── RESULTS ── */
+#results{align-items:center;justify-content:flex-start;
+  padding:calc(var(--safe-top) + 14px) 22px calc(var(--safe-bot) + 24px);
+  background:radial-gradient(ellipse at 70% 80%,#1a3a2a 0%,var(--bg) 60%);
+  gap:0;overflow-y:auto;}
+.result-emoji{font-size:3.2rem;margin-bottom:10px;margin-top:auto;}
+#results > :last-child{margin-bottom:auto;}
+
+/* ── MISTAKE REVIEW ── */
+.review{width:100%;margin-top:22px;}
+.review-title{font-size:.64rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.review-empty{background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.3);border-radius:13px;
+  padding:14px;text-align:center;font-size:.8rem;color:var(--green);font-weight:700;}
+.rv-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:8px;}
+.rv-head{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
+.rv-num{font-family:'Syne Mono',monospace;font-size:.62rem;color:var(--muted);}
+.rv-verb{font-size:1.05rem;font-weight:800;color:var(--gold2);}
+.rv-meaning{font-size:.62rem;color:var(--muted);}
+.rv-ctx{font-size:.66rem;color:var(--blue);margin-bottom:8px;}
+.rv-row{display:flex;align-items:center;gap:8px;font-family:'Syne Mono',monospace;font-size:.88rem;margin-top:4px;}
+.rv-lbl{font-family:'Syne',sans-serif;font-size:.56rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);width:76px;flex-shrink:0;white-space:nowrap;}
+.rv-wrong{color:var(--red);text-decoration:line-through;text-decoration-color:rgba(255,95,95,.6);}
+.rv-right{color:var(--green);font-weight:700;}
+.rv-diff{background:rgba(245,200,66,.28);border-radius:3px;padding:0 1px;}
+.rv-note{font-size:.58rem;color:var(--muted);margin-top:6px;}
+.result-title{font-size:1.9rem;font-weight:800;text-align:center;margin-bottom:5px;}
+.result-sub{font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:20px;}
+.score-ring-wrap{position:relative;width:140px;height:140px;margin-bottom:20px;}
+.score-ring-wrap svg{transform:rotate(-90deg);}
+.score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-pct{font-size:1.9rem;font-weight:800;color:var(--gold);}
+.score-lbl{font-size:.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;margin-bottom:18px;}
+.rs-chip{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 7px;text-align:center;}
+.rs-chip .rv{font-size:1.35rem;font-weight:800;}
+.rs-chip .rl{font-size:.56rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.rs-chip.green .rv{color:var(--green);}.rs-chip.red .rv{color:var(--red);}.rs-chip.gold .rv{color:var(--gold);}
+.result-actions{display:flex;flex-direction:column;gap:8px;width:100%;}
+.r-btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,var(--gold) 0%,#e6b800 100%);
+  color:#0f1923;border:none;border-radius:13px;font-family:'Syne',sans-serif;
+  font-size:.92rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.r-btn-primary:active{transform:scale(.97);}
+.r-btn-sec{width:100%;padding:13px;background:var(--card);border:1px solid var(--border);
+  color:var(--text);border-radius:13px;font-family:'Syne',sans-serif;font-size:.85rem;
+  font-weight:700;cursor:pointer;transition:all .2s;}
+.r-btn-sec:active{transform:scale(.97);}
+
+/* ── INSTALL MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:300;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.install-modal{background:var(--card);border:1px solid var(--border);
+  border-radius:22px 22px 0 0;
+  padding:20px 22px calc(var(--safe-bot) + 16px);
+  width:100%;max-width:500px;
+  transform:translateY(50px);transition:transform .3s ease;}
+.modal-overlay.open .install-modal{transform:translateY(0);}
+.modal-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-size:1.05rem;font-weight:800;margin-bottom:4px;}
+.modal-sub{font-size:.72rem;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.install-step{display:flex;align-items:flex-start;gap:11px;margin-bottom:14px;}
+.step-num{width:26px;height:26px;border-radius:50%;background:rgba(245,200,66,.15);
+  border:1px solid rgba(245,200,66,.4);color:var(--gold);font-size:.72rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-text{font-size:.78rem;line-height:1.55;color:var(--text);}
+.step-text strong{color:var(--gold2);}
+.warning-note{background:rgba(255,95,95,.08);border:1px solid rgba(255,95,95,.25);
+  border-radius:10px;padding:10px 13px;font-size:.67rem;color:var(--muted);
+  line-height:1.5;margin-bottom:14px;}
+.warning-note strong{color:var(--red);}
+.modal-close{width:100%;padding:13px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;color:var(--muted);font-family:'Syne',sans-serif;font-size:.82rem;
+  font-weight:700;cursor:pointer;transition:all .2s;}
+.modal-close:active{transform:scale(.98);}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HOME ══════════════ -->
+<div class="screen" id="home">
+  <div class="home-badge">🇪🇸 Práctica de español</div>
+  <div class="home-title">Conjuga<br>ES</div>
+  <div class="home-sub">Un tiempo por ronda.<br>Domina la conjugación en español.</div>
+
+  <div class="section-label">Tiempo (fijo durante toda la ronda)</div>
+  <div class="mode-grid">
+    <div class="mode-btn selected" data-tense="presente" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">🌱</span><span class="label">Presente</span>
+    </div>
+    <div class="mode-btn" data-tense="indefinido" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">📜</span><span class="label">Indefinido</span>
+    </div>
+    <div class="mode-btn" data-tense="imperfecto" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">🌀</span><span class="label">Imperfecto</span>
+    </div>
+    <div class="mode-btn" data-tense="futuro" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">🚀</span><span class="label">Futuro</span>
+    </div>
+    <div class="mode-btn" data-tense="condicional" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">💭</span><span class="label">Condicional</span>
+    </div>
+    <div class="mode-btn" data-tense="perfecto" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">✅</span><span class="label">Pret. perfecto</span>
+    </div>
+    <div class="mode-btn" data-tense="subjuntivo" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">🤍</span><span class="label">Subj. presente</span>
+    </div>
+    <div class="mode-btn" data-tense="mix" onclick="selectTense(this)">
+      <div class="check">✓</div><span class="icon">🎲</span><span class="label">Mezcla por ronda</span>
+    </div>
+  </div>
+
+  <div class="section-label">Verbos</div>
+  <div class="seg">
+    <button class="seg-btn selected" data-verbs="all" onclick="selectVerbs(this)">
+      Todos<small id="cnt-all"></small>
+    </button>
+    <button class="seg-btn" data-verbs="reg" onclick="selectVerbs(this)">
+      Solo regulares<small id="cnt-reg"></small>
+    </button>
+    <button class="seg-btn" data-verbs="irr" onclick="selectVerbs(this)">
+      Solo irregulares<small id="cnt-irr"></small>
+    </button>
+  </div>
+
+  <button class="start-btn" onclick="startQuiz()">Empezar →</button>
+
+  <div class="stats-row">
+    <div class="stat-chip"><div class="sv" id="stat-total">0</div><div class="sl">Respondidas</div></div>
+    <div class="stat-chip"><div class="sv" id="stat-streak">0</div><div class="sl">Mejor racha</div></div>
+    <div class="stat-chip"><div class="sv" id="stat-acc">—</div><div class="sl">Precisión</div></div>
+  </div>
+
+  <div class="install-home-btn" onclick="openInstallModal()">
+    <span class="ih-icon">📲</span>
+    <div class="ih-text">
+      <div class="ih-title">Añadir a la pantalla de inicio</div>
+      <div class="ih-sub">Instálala como app: guía paso a paso</div>
+    </div>
+    <span class="ih-arrow">›</span>
+  </div>
+</div>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<div class="screen hidden" id="quiz">
+  <div class="quiz-header">
+    <div class="q-back" onclick="goHome()">←</div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-label" id="prog-label">0 / 10</div>
+    </div>
+    <div class="streak-badge">🔥 <span id="streak-num">0</span></div>
+  </div>
+
+  <div class="quiz-card-area" id="quiz-card-area">
+    <div class="tense-tag" id="tense-tag">🌱 Presente</div>
+
+    <div class="question-card" id="qcard">
+      <div class="q-prompt">Conjuga el verbo</div>
+      <div class="q-verb" id="q-verb">hablar</div>
+      <div class="q-meaning" id="q-meaning">to speak</div>
+      <div class="q-context">
+        <span class="q-pronoun" id="q-pronoun">yo</span>
+        <span class="q-arrow">→</span>
+        <span class="q-tense-ctx" id="q-tense-ctx">Presente</span>
+      </div>
+    </div>
+
+    <div class="special-chars">
+      <div class="special-chars-label">Caracteres especiales · toca para insertar</div>
+      <div class="special-chars-row">
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('á')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">á</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('é')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">é</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('í')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">í</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('ó')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">ó</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('ú')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">ú</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('ñ')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">ñ</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('ü')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">ü</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('¡')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">¡</button>
+        <button class="char-btn" onpointerdown="event.preventDefault();this.classList.add('pressed');insertChar('¿')" onpointerup="this.classList.remove('pressed')" onpointerleave="this.classList.remove('pressed')">¿</button>
+      </div>
+    </div>
+
+    <div class="answer-section">
+      <div class="answer-input-wrap">
+        <input class="answer-input" id="answer-input" type="text"
+          placeholder="Escribe tu respuesta…" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false"
+          onkeydown="if(event.key==='Enter')checkAnswer()">
+        <button class="submit-inline" onclick="checkAnswer()">→</button>
+      </div>
+
+      <div class="feedback-box" id="feedback-box">
+        <div class="fb-title" id="fb-title"></div>
+        <div class="fb-your" id="fb-your"></div>
+        <div class="fb-note" id="fb-note"></div>
+      </div>
+    </div>
+
+    <div class="full-conj" id="full-conj">
+      <div class="full-conj-header">
+        <div class="full-conj-title">📋 Conjugación completa · <span id="fc-label"></span></div>
+      </div>
+      <div class="conj-table-wrap">
+        <table class="conj-table">
+          <thead><tr><th>Pronombre</th><th>Forma</th></tr></thead>
+          <tbody id="fc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- ══════════════ RESULTS ══════════════ -->
+<div class="screen hidden" id="results">
+  <div class="result-emoji" id="result-emoji">🎉</div>
+  <div class="result-title" id="result-title">¡Excelente!</div>
+  <div class="result-sub" id="result-sub">Quiz completado</div>
+  <div class="score-ring-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <circle cx="70" cy="70" r="60" fill="none" stroke="#1c2a3a" stroke-width="9"/>
+      <circle cx="70" cy="70" r="60" fill="none" stroke="url(#rg)" stroke-width="9"
+        stroke-linecap="round" id="score-arc"
+        stroke-dasharray="377" stroke-dashoffset="377"/>
+      <defs>
+        <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#f5c842"/>
+          <stop offset="100%" stop-color="#3ddc84"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="score-text">
+      <div class="score-pct" id="score-pct">0%</div>
+      <div class="score-lbl">Puntuación</div>
+    </div>
+  </div>
+  <div class="result-stats">
+    <div class="rs-chip green"><div class="rv" id="r-correct">0</div><div class="rl">Correctas</div></div>
+    <div class="rs-chip red"><div class="rv" id="r-wrong">0</div><div class="rl">Incorrectas</div></div>
+    <div class="rs-chip gold"><div class="rv" id="r-streak">0</div><div class="rl">Mejor racha</div></div>
+  </div>
+  <div class="result-actions">
+    <button class="r-btn-primary" onclick="startQuiz()">Jugar otra vez</button>
+    <button class="r-btn-sec" onclick="goHome()">← Volver al menú</button>
+  </div>
+  <div class="review" id="review"></div>
+</div>
+
+<!-- ══════════════ INSTALL MODAL ══════════════ -->
+<div class="modal-overlay" id="install-modal" onclick="handleOverlayClick(event)">
+  <div class="install-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📲 Añadir a la pantalla de inicio</div>
+    <div class="modal-sub">Instala ConjugaES como una app independiente. No necesitas App Store: funciona directamente desde tu navegador.</div>
+
+    <div class="install-step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>iPhone / iPad</strong>: solo con <strong>Safari</strong><br>
+        Toca el icono <strong>Compartir</strong> (□↑) en la parte inferior de la pantalla → desplázate y toca <strong>"Añadir a pantalla de inicio"</strong> → toca <strong>Añadir</strong>.
+      </div>
+    </div>
+
+    <div class="install-step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>Android</strong>: Chrome o Edge<br>
+        Toca el menú <strong>⋮</strong> (arriba a la derecha) → toca <strong>"Añadir a la pantalla de inicio"</strong> o <strong>"Instalar app"</strong>.
+      </div>
+    </div>
+
+    <div class="install-step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>Ordenador</strong>: Chrome / Edge<br>
+        Busca el <strong>icono de instalar ⊕</strong> en la barra de direcciones, o ve al menú → <strong>"Instalar ConjugaES"</strong>.
+      </div>
+    </div>
+
+    <div class="warning-note">
+      <strong>⚠️ Usuarios de iPhone:</strong> esto solo funciona en <strong>Safari</strong>. Si abriste esta página en Chrome u otro navegador en iPhone, copia el enlace y ábrelo primero en Safari.
+    </div>
+
+    <button class="modal-close" onclick="closeInstallModal()">Entendido, cerrar</button>
+  </div>
+</div>
+
+<script>
+// ════════════════ DATA ════════════════
+const PRONOUNS = ['yo','tú','él/ella','nosotros','vosotros','ellos/ellas'];
+const HABER_PRES = ['he','has','ha','hemos','habéis','han'];
+
+// Regular verbs (-ar, -er, -ir). Leer is NOT here: its preterite is irregular (leyó).
+const REGULAR = [
+  {inf:'hablar',type:'ar',en:'to speak'},
+  {inf:'caminar',type:'ar',en:'to walk'},
+  {inf:'trabajar',type:'ar',en:'to work'},
+  {inf:'comprar',type:'ar',en:'to buy'},
+  {inf:'escuchar',type:'ar',en:'to listen'},
+  {inf:'bailar',type:'ar',en:'to dance'},
+  {inf:'llamar',type:'ar',en:'to call'},
+  {inf:'mirar',type:'ar',en:'to look / watch'},
+  {inf:'comer',type:'er',en:'to eat'},
+  {inf:'beber',type:'er',en:'to drink'},
+  {inf:'correr',type:'er',en:'to run'},
+  {inf:'vivir',type:'ir',en:'to live'},
+  {inf:'subir',type:'ir',en:'to go up'},
+  {inf:'partir',type:'ir',en:'to leave / depart'},
+  // ── Added: 100 common regular verbs (plain -ar/-er/-ir, no spelling or stem changes). Checked against the RAE irregular-verb index; 12 sampled against the DLE tables. ──
+  {inf:'pasar',type:'ar',en:'to pass / to spend (time)'},
+  {inf:'quedar',type:'ar',en:'to stay / to remain'},
+  {inf:'llevar',type:'ar',en:'to carry / to wear'},
+  {inf:'dejar',type:'ar',en:'to leave / to let'},
+  {inf:'necesitar',type:'ar',en:'to need'},
+  {inf:'usar',type:'ar',en:'to use'},
+  {inf:'esperar',type:'ar',en:'to wait / to hope'},
+  {inf:'ayudar',type:'ar',en:'to help'},
+  {inf:'cambiar',type:'ar',en:'to change'},
+  {inf:'estudiar',type:'ar',en:'to study'},
+  {inf:'tomar',type:'ar',en:'to take / to drink'},
+  {inf:'mandar',type:'ar',en:'to send / to order'},
+  {inf:'preparar',type:'ar',en:'to prepare'},
+  {inf:'terminar',type:'ar',en:'to finish'},
+  {inf:'olvidar',type:'ar',en:'to forget'},
+  {inf:'gustar',type:'ar',en:'to like (be pleasing)'},
+  {inf:'cantar',type:'ar',en:'to sing'},
+  {inf:'cenar',type:'ar',en:'to have dinner'},
+  {inf:'desayunar',type:'ar',en:'to have breakfast'},
+  {inf:'limpiar',type:'ar',en:'to clean'},
+  {inf:'lavar',type:'ar',en:'to wash'},
+  {inf:'cocinar',type:'ar',en:'to cook'},
+  {inf:'viajar',type:'ar',en:'to travel'},
+  {inf:'nadar',type:'ar',en:'to swim'},
+  {inf:'descansar',type:'ar',en:'to rest'},
+  {inf:'ganar',type:'ar',en:'to win / to earn'},
+  {inf:'cuidar',type:'ar',en:'to take care of'},
+  {inf:'mejorar',type:'ar',en:'to improve'},
+  {inf:'contestar',type:'ar',en:'to answer'},
+  {inf:'preguntar',type:'ar',en:'to ask (a question)'},
+  {inf:'invitar',type:'ar',en:'to invite'},
+  {inf:'celebrar',type:'ar',en:'to celebrate'},
+  {inf:'pintar',type:'ar',en:'to paint'},
+  {inf:'intentar',type:'ar',en:'to try / to attempt'},
+  {inf:'evitar',type:'ar',en:'to avoid'},
+  {inf:'lograr',type:'ar',en:'to achieve'},
+  {inf:'acompañar',type:'ar',en:'to accompany'},
+  {inf:'aceptar',type:'ar',en:'to accept'},
+  {inf:'entrar',type:'ar',en:'to enter'},
+  {inf:'ahorrar',type:'ar',en:'to save (money)'},
+  {inf:'arreglar',type:'ar',en:'to fix / to arrange'},
+  {inf:'aprovechar',type:'ar',en:'to take advantage of'},
+  {inf:'comentar',type:'ar',en:'to comment'},
+  {inf:'comparar',type:'ar',en:'to compare'},
+  {inf:'considerar',type:'ar',en:'to consider'},
+  {inf:'consultar',type:'ar',en:'to consult'},
+  {inf:'controlar',type:'ar',en:'to control'},
+  {inf:'crear',type:'ar',en:'to create'},
+  {inf:'desear',type:'ar',en:'to wish / to want'},
+  {inf:'dudar',type:'ar',en:'to doubt'},
+  {inf:'enseñar',type:'ar',en:'to teach / to show'},
+  {inf:'entrenar',type:'ar',en:'to train'},
+  {inf:'funcionar',type:'ar',en:'to work / to function'},
+  {inf:'guardar',type:'ar',en:'to keep / to save'},
+  {inf:'informar',type:'ar',en:'to inform'},
+  {inf:'levantar',type:'ar',en:'to lift / to raise'},
+  {inf:'llorar',type:'ar',en:'to cry'},
+  {inf:'manejar',type:'ar',en:'to handle / to drive'},
+  {inf:'molestar',type:'ar',en:'to bother'},
+  {inf:'parar',type:'ar',en:'to stop'},
+  {inf:'participar',type:'ar',en:'to take part'},
+  {inf:'presentar',type:'ar',en:'to present / to introduce'},
+  {inf:'quitar',type:'ar',en:'to remove / to take away'},
+  {inf:'regalar',type:'ar',en:'to give (as a gift)'},
+  {inf:'respetar',type:'ar',en:'to respect'},
+  {inf:'saludar',type:'ar',en:'to greet'},
+  {inf:'tratar',type:'ar',en:'to try / to treat'},
+  {inf:'visitar',type:'ar',en:'to visit'},
+  {inf:'votar',type:'ar',en:'to vote'},
+  {inf:'deber',type:'er',en:'to owe / must'},
+  {inf:'aprender',type:'er',en:'to learn'},
+  {inf:'comprender',type:'er',en:'to understand'},
+  {inf:'vender',type:'er',en:'to sell'},
+  {inf:'responder',type:'er',en:'to answer / to respond'},
+  {inf:'meter',type:'er',en:'to put in'},
+  {inf:'depender',type:'er',en:'to depend'},
+  {inf:'esconder',type:'er',en:'to hide'},
+  {inf:'prometer',type:'er',en:'to promise'},
+  {inf:'temer',type:'er',en:'to fear'},
+  {inf:'sorprender',type:'er',en:'to surprise'},
+  {inf:'ofender',type:'er',en:'to offend'},
+  {inf:'suspender',type:'er',en:'to suspend / to fail (an exam)'},
+  {inf:'barrer',type:'er',en:'to sweep'},
+  {inf:'decidir',type:'ir',en:'to decide'},
+  {inf:'recibir',type:'ir',en:'to receive'},
+  {inf:'permitir',type:'ir',en:'to allow'},
+  {inf:'existir',type:'ir',en:'to exist'},
+  {inf:'compartir',type:'ir',en:'to share'},
+  {inf:'añadir',type:'ir',en:'to add'},
+  {inf:'discutir',type:'ir',en:'to discuss / to argue'},
+  {inf:'sufrir',type:'ir',en:'to suffer'},
+  {inf:'admitir',type:'ir',en:'to admit'},
+  {inf:'asistir',type:'ir',en:'to attend'},
+  {inf:'insistir',type:'ir',en:'to insist'},
+  {inf:'resumir',type:'ir',en:'to summarize'},
+  {inf:'definir',type:'ir',en:'to define'},
+  {inf:'ocurrir',type:'ir',en:'to happen / to occur'},
+  {inf:'cumplir',type:'ir',en:'to fulfil / to turn (age)'},
+  {inf:'unir',type:'ir',en:'to join / to unite'},
+  {inf:'dividir',type:'ir',en:'to divide'},
+  // ── Added: 50 more common regular verbs (plain -ar/-er/-ir). Checked against the RAE irregular-verb index; 9 sampled against the DLE tables. ──
+  {inf:'amar',type:'ar',en:'to love'},
+  {inf:'bajar',type:'ar',en:'to go down / to lower'},
+  {inf:'avisar',type:'ar',en:'to warn / to notify'},
+  {inf:'apuntar',type:'ar',en:'to note down / to point'},
+  {inf:'alquilar',type:'ar',en:'to rent'},
+  {inf:'borrar',type:'ar',en:'to erase / to delete'},
+  {inf:'cortar',type:'ar',en:'to cut'},
+  {inf:'disfrutar',type:'ar',en:'to enjoy'},
+  {inf:'echar',type:'ar',en:'to throw / to pour'},
+  {inf:'faltar',type:'ar',en:'to be missing / to lack'},
+  {inf:'firmar',type:'ar',en:'to sign'},
+  {inf:'fumar',type:'ar',en:'to smoke'},
+  {inf:'hallar',type:'ar',en:'to find'},
+  {inf:'imaginar',type:'ar',en:'to imagine'},
+  {inf:'limitar',type:'ar',en:'to limit'},
+  {inf:'llenar',type:'ar',en:'to fill'},
+  {inf:'nombrar',type:'ar',en:'to name / to appoint'},
+  {inf:'ordenar',type:'ar',en:'to order / to tidy'},
+  {inf:'pelear',type:'ar',en:'to fight'},
+  {inf:'perdonar',type:'ar',en:'to forgive'},
+  {inf:'prestar',type:'ar',en:'to lend'},
+  {inf:'robar',type:'ar',en:'to steal'},
+  {inf:'separar',type:'ar',en:'to separate'},
+  {inf:'señalar',type:'ar',en:'to point out'},
+  {inf:'sumar',type:'ar',en:'to add up'},
+  {inf:'tardar',type:'ar',en:'to take (time) / to be late'},
+  {inf:'dibujar',type:'ar',en:'to draw'},
+  {inf:'grabar',type:'ar',en:'to record'},
+  {inf:'observar',type:'ar',en:'to observe'},
+  {inf:'opinar',type:'ar',en:'to give an opinion'},
+  {inf:'luchar',type:'ar',en:'to fight / to struggle'},
+  {inf:'montar',type:'ar',en:'to ride / to set up'},
+  {inf:'gritar',type:'ar',en:'to shout'},
+  {inf:'notar',type:'ar',en:'to notice'},
+  {inf:'tirar',type:'ar',en:'to throw / to pull'},
+  {inf:'formar',type:'ar',en:'to form'},
+  {inf:'recorrer',type:'er',en:'to travel through'},
+  {inf:'comprometer',type:'er',en:'to commit / to compromise'},
+  {inf:'someter',type:'er',en:'to subject'},
+  {inf:'toser',type:'er',en:'to cough'},
+  {inf:'coser',type:'er',en:'to sew'},
+  {inf:'ceder',type:'er',en:'to give way / to yield'},
+  {inf:'omitir',type:'ir',en:'to omit'},
+  {inf:'persistir',type:'ir',en:'to persist'},
+  {inf:'residir',type:'ir',en:'to reside'},
+  {inf:'transmitir',type:'ir',en:'to transmit / to broadcast'},
+  {inf:'consumir',type:'ir',en:'to consume'},
+  {inf:'invadir',type:'ir',en:'to invade'},
+  {inf:'repartir',type:'ir',en:'to distribute / to deliver'},
+  {inf:'aplaudir',type:'ir',en:'to applaud'},
+];
+
+// Irregular and stem-changing verbs.
+// p = presente, i = indefinido, m = imperfecto, pp = participio,
+// s = presente de subjuntivo, f = raíz del futuro/condicional (default = infinitivo).
+const IRREGULAR = [
+  {inf:'ser',en:'to be (permanent)',p:['soy','eres','es','somos','sois','son'],i:['fui','fuiste','fue','fuimos','fuisteis','fueron'],m:['era','eras','era','éramos','erais','eran'],pp:'sido',s:['sea','seas','sea','seamos','seáis','sean']},
+  {inf:'estar',en:'to be (temporary)',p:['estoy','estás','está','estamos','estáis','están'],i:['estuve','estuviste','estuvo','estuvimos','estuvisteis','estuvieron'],m:['estaba','estabas','estaba','estábamos','estabais','estaban'],pp:'estado',s:['esté','estés','esté','estemos','estéis','estén']},
+  {inf:'haber',en:'to have (auxiliary)',p:['he','has','ha','hemos','habéis','han'],i:['hube','hubiste','hubo','hubimos','hubisteis','hubieron'],m:['había','habías','había','habíamos','habíais','habían'],pp:'habido',s:['haya','hayas','haya','hayamos','hayáis','hayan'],f:'habr'},
+  {inf:'tener',en:'to have',p:['tengo','tienes','tiene','tenemos','tenéis','tienen'],i:['tuve','tuviste','tuvo','tuvimos','tuvisteis','tuvieron'],m:['tenía','tenías','tenía','teníamos','teníais','tenían'],pp:'tenido',s:['tenga','tengas','tenga','tengamos','tengáis','tengan'],f:'tendr'},
+  {inf:'ir',en:'to go',p:['voy','vas','va','vamos','vais','van'],i:['fui','fuiste','fue','fuimos','fuisteis','fueron'],m:['iba','ibas','iba','íbamos','ibais','iban'],pp:'ido',s:['vaya','vayas','vaya','vayamos','vayáis','vayan']},
+  {inf:'poder',en:'to be able to / can',p:['puedo','puedes','puede','podemos','podéis','pueden'],i:['pude','pudiste','pudo','pudimos','pudisteis','pudieron'],m:['podía','podías','podía','podíamos','podíais','podían'],pp:'podido',s:['pueda','puedas','pueda','podamos','podáis','puedan'],f:'podr'},
+  {inf:'querer',en:'to want / to love',p:['quiero','quieres','quiere','queremos','queréis','quieren'],i:['quise','quisiste','quiso','quisimos','quisisteis','quisieron'],m:['quería','querías','quería','queríamos','queríais','querían'],pp:'querido',s:['quiera','quieras','quiera','queramos','queráis','quieran'],f:'querr'},
+  {inf:'saber',en:'to know (facts)',p:['sé','sabes','sabe','sabemos','sabéis','saben'],i:['supe','supiste','supo','supimos','supisteis','supieron'],m:['sabía','sabías','sabía','sabíamos','sabíais','sabían'],pp:'sabido',s:['sepa','sepas','sepa','sepamos','sepáis','sepan'],f:'sabr'},
+  {inf:'hacer',en:'to do / to make',p:['hago','haces','hace','hacemos','hacéis','hacen'],i:['hice','hiciste','hizo','hicimos','hicisteis','hicieron'],m:['hacía','hacías','hacía','hacíamos','hacíais','hacían'],pp:'hecho',s:['haga','hagas','haga','hagamos','hagáis','hagan'],f:'har'},
+  {inf:'decir',en:'to say / to tell',p:['digo','dices','dice','decimos','decís','dicen'],i:['dije','dijiste','dijo','dijimos','dijisteis','dijeron'],m:['decía','decías','decía','decíamos','decíais','decían'],pp:'dicho',s:['diga','digas','diga','digamos','digáis','digan'],f:'dir'},
+  {inf:'venir',en:'to come',p:['vengo','vienes','viene','venimos','venís','vienen'],i:['vine','viniste','vino','vinimos','vinisteis','vinieron'],m:['venía','venías','venía','veníamos','veníais','venían'],pp:'venido',s:['venga','vengas','venga','vengamos','vengáis','vengan'],f:'vendr'},
+  {inf:'poner',en:'to put / to place',p:['pongo','pones','pone','ponemos','ponéis','ponen'],i:['puse','pusiste','puso','pusimos','pusisteis','pusieron'],m:['ponía','ponías','ponía','poníamos','poníais','ponían'],pp:'puesto',s:['ponga','pongas','ponga','pongamos','pongáis','pongan'],f:'pondr'},
+  {inf:'salir',en:'to leave / go out',p:['salgo','sales','sale','salimos','salís','salen'],i:['salí','saliste','salió','salimos','salisteis','salieron'],m:['salía','salías','salía','salíamos','salíais','salían'],pp:'salido',s:['salga','salgas','salga','salgamos','salgáis','salgan'],f:'saldr'},
+  {inf:'traer',en:'to bring',p:['traigo','traes','trae','traemos','traéis','traen'],i:['traje','trajiste','trajo','trajimos','trajisteis','trajeron'],m:['traía','traías','traía','traíamos','traíais','traían'],pp:'traído',s:['traiga','traigas','traiga','traigamos','traigáis','traigan']},
+  {inf:'ver',en:'to see',p:['veo','ves','ve','vemos','veis','ven'],i:['vi','viste','vio','vimos','visteis','vieron'],m:['veía','veías','veía','veíamos','veíais','veían'],pp:'visto',s:['vea','veas','vea','veamos','veáis','vean']},
+  {inf:'dar',en:'to give',p:['doy','das','da','damos','dais','dan'],i:['di','diste','dio','dimos','disteis','dieron'],m:['daba','dabas','daba','dábamos','dabais','daban'],pp:'dado',s:['dé','des','dé','demos','deis','den']},
+  {inf:'sentir',en:'to feel',p:['siento','sientes','siente','sentimos','sentís','sienten'],i:['sentí','sentiste','sintió','sentimos','sentisteis','sintieron'],m:['sentía','sentías','sentía','sentíamos','sentíais','sentían'],pp:'sentido',s:['sienta','sientas','sienta','sintamos','sintáis','sientan']},
+  {inf:'dormir',en:'to sleep',p:['duermo','duermes','duerme','dormimos','dormís','duermen'],i:['dormí','dormiste','durmió','dormimos','dormisteis','durmieron'],m:['dormía','dormías','dormía','dormíamos','dormíais','dormían'],pp:'dormido',s:['duerma','duermas','duerma','durmamos','durmáis','duerman']},
+  {inf:'pedir',en:'to ask for / order',p:['pido','pides','pide','pedimos','pedís','piden'],i:['pedí','pediste','pidió','pedimos','pedisteis','pidieron'],m:['pedía','pedías','pedía','pedíamos','pedíais','pedían'],pp:'pedido',s:['pida','pidas','pida','pidamos','pidáis','pidan']},
+  {inf:'jugar',en:'to play',p:['juego','juegas','juega','jugamos','jugáis','juegan'],i:['jugué','jugaste','jugó','jugamos','jugasteis','jugaron'],m:['jugaba','jugabas','jugaba','jugábamos','jugabais','jugaban'],pp:'jugado',s:['juegue','juegues','juegue','juguemos','juguéis','jueguen']},
+  {inf:'volver',en:'to return / come back',p:['vuelvo','vuelves','vuelve','volvemos','volvéis','vuelven'],i:['volví','volviste','volvió','volvimos','volvisteis','volvieron'],m:['volvía','volvías','volvía','volvíamos','volvíais','volvían'],pp:'vuelto',s:['vuelva','vuelvas','vuelva','volvamos','volváis','vuelvan']},
+  {inf:'conocer',en:'to know (sb / place)',p:['conozco','conoces','conoce','conocemos','conocéis','conocen'],i:['conocí','conociste','conoció','conocimos','conocisteis','conocieron'],m:['conocía','conocías','conocía','conocíamos','conocíais','conocían'],pp:'conocido',s:['conozca','conozcas','conozca','conozcamos','conozcáis','conozcan']},
+  {inf:'perder',en:'to lose',p:['pierdo','pierdes','pierde','perdemos','perdéis','pierden'],i:['perdí','perdiste','perdió','perdimos','perdisteis','perdieron'],m:['perdía','perdías','perdía','perdíamos','perdíais','perdían'],pp:'perdido',s:['pierda','pierdas','pierda','perdamos','perdáis','pierdan']},
+  {inf:'entender',en:'to understand',p:['entiendo','entiendes','entiende','entendemos','entendéis','entienden'],i:['entendí','entendiste','entendió','entendimos','entendisteis','entendieron'],m:['entendía','entendías','entendía','entendíamos','entendíais','entendían'],pp:'entendido',s:['entienda','entiendas','entienda','entendamos','entendáis','entiendan']},
+  {inf:'encontrar',en:'to find / meet',p:['encuentro','encuentras','encuentra','encontramos','encontráis','encuentran'],i:['encontré','encontraste','encontró','encontramos','encontrasteis','encontraron'],m:['encontraba','encontrabas','encontraba','encontrábamos','encontrabais','encontraban'],pp:'encontrado',s:['encuentre','encuentres','encuentre','encontremos','encontréis','encuentren']},
+  {inf:'recordar',en:'to remember',p:['recuerdo','recuerdas','recuerda','recordamos','recordáis','recuerdan'],i:['recordé','recordaste','recordó','recordamos','recordasteis','recordaron'],m:['recordaba','recordabas','recordaba','recordábamos','recordabais','recordaban'],pp:'recordado',s:['recuerde','recuerdes','recuerde','recordemos','recordéis','recuerden']},
+  {inf:'empezar',en:'to begin / start',p:['empiezo','empiezas','empieza','empezamos','empezáis','empiezan'],i:['empecé','empezaste','empezó','empezamos','empezasteis','empezaron'],m:['empezaba','empezabas','empezaba','empezábamos','empezabais','empezaban'],pp:'empezado',s:['empiece','empieces','empiece','empecemos','empecéis','empiecen']},
+  {inf:'cerrar',en:'to close',p:['cierro','cierras','cierra','cerramos','cerráis','cierran'],i:['cerré','cerraste','cerró','cerramos','cerrasteis','cerraron'],m:['cerraba','cerrabas','cerraba','cerrábamos','cerrabais','cerraban'],pp:'cerrado',s:['cierre','cierres','cierre','cerremos','cerréis','cierren']},
+  {inf:'caer',en:'to fall',p:['caigo','caes','cae','caemos','caéis','caen'],i:['caí','caíste','cayó','caímos','caísteis','cayeron'],m:['caía','caías','caía','caíamos','caíais','caían'],pp:'caído',s:['caiga','caigas','caiga','caigamos','caigáis','caigan']},
+  {inf:'oír',en:'to hear',p:['oigo','oyes','oye','oímos','oís','oyen'],i:['oí','oíste','oyó','oímos','oísteis','oyeron'],m:['oía','oías','oía','oíamos','oíais','oían'],pp:'oído',s:['oiga','oigas','oiga','oigamos','oigáis','oigan']},
+  {inf:'leer',en:'to read',p:['leo','lees','lee','leemos','leéis','leen'],i:['leí','leíste','leyó','leímos','leísteis','leyeron'],m:['leía','leías','leía','leíamos','leíais','leían'],pp:'leído',s:['lea','leas','lea','leamos','leáis','lean']},
+  {inf:'andar',en:'to walk',p:['ando','andas','anda','andamos','andáis','andan'],i:['anduve','anduviste','anduvo','anduvimos','anduvisteis','anduvieron'],m:['andaba','andabas','andaba','andábamos','andabais','andaban'],pp:'andado',s:['ande','andes','ande','andemos','andéis','anden']},
+  {inf:'caber',en:'to fit',p:['quepo','cabes','cabe','cabemos','cabéis','caben'],i:['cupe','cupiste','cupo','cupimos','cupisteis','cupieron'],m:['cabía','cabías','cabía','cabíamos','cabíais','cabían'],pp:'cabido',s:['quepa','quepas','quepa','quepamos','quepáis','quepan'],f:'cabr'},
+  {inf:'conducir',en:'to drive / lead',p:['conduzco','conduces','conduce','conducimos','conducís','conducen'],i:['conduje','condujiste','condujo','condujimos','condujisteis','condujeron'],m:['conducía','conducías','conducía','conducíamos','conducíais','conducían'],pp:'conducido',s:['conduzca','conduzcas','conduzca','conduzcamos','conduzcáis','conduzcan']},
+  {inf:'construir',en:'to build',p:['construyo','construyes','construye','construimos','construís','construyen'],i:['construí','construiste','construyó','construimos','construisteis','construyeron'],m:['construía','construías','construía','construíamos','construíais','construían'],pp:'construido',s:['construya','construyas','construya','construyamos','construyáis','construyan']},
+  {inf:'contar',en:'to count / to tell',p:['cuento','cuentas','cuenta','contamos','contáis','cuentan'],i:['conté','contaste','contó','contamos','contasteis','contaron'],m:['contaba','contabas','contaba','contábamos','contabais','contaban'],pp:'contado',s:['cuente','cuentes','cuente','contemos','contéis','cuenten']},
+  {inf:'acertar',en:'to guess right / hit',p:['acierto','aciertas','acierta','acertamos','acertáis','aciertan'],i:['acerté','acertaste','acertó','acertamos','acertasteis','acertaron'],m:['acertaba','acertabas','acertaba','acertábamos','acertabais','acertaban'],pp:'acertado',s:['acierte','aciertes','acierte','acertemos','acertéis','acierten']},
+  {inf:'adquirir',en:'to acquire',p:['adquiero','adquieres','adquiere','adquirimos','adquirís','adquieren'],i:['adquirí','adquiriste','adquirió','adquirimos','adquiristeis','adquirieron'],m:['adquiría','adquirías','adquiría','adquiríamos','adquiríais','adquirían'],pp:'adquirido',s:['adquiera','adquieras','adquiera','adquiramos','adquiráis','adquieran']},
+  {inf:'agradecer',en:'to thank',p:['agradezco','agradeces','agradece','agradecemos','agradecéis','agradecen'],i:['agradecí','agradeciste','agradeció','agradecimos','agradecisteis','agradecieron'],m:['agradecía','agradecías','agradecía','agradecíamos','agradecíais','agradecían'],pp:'agradecido',s:['agradezca','agradezcas','agradezca','agradezcamos','agradezcáis','agradezcan']},
+  // ── Added from the RAE "Conjugación verbal" appendix (rae.es, Diccionario del estudiante) ──
+  // Note: RAE spelling rules (2010) drop the accent on monosyllables: "huis", "rio", "riais".
+  {inf:'huir',en:'to flee / run away',p:['huyo','huyes','huye','huimos','huis','huyen'],i:['huí','huiste','huyó','huimos','huisteis','huyeron'],m:['huía','huías','huía','huíamos','huíais','huían'],pp:'huido',s:['huya','huyas','huya','huyamos','huyáis','huyan']},
+  {inf:'mover',en:'to move',p:['muevo','mueves','mueve','movemos','movéis','mueven'],i:['moví','moviste','movió','movimos','movisteis','movieron'],m:['movía','movías','movía','movíamos','movíais','movían'],pp:'movido',s:['mueva','muevas','mueva','movamos','mováis','muevan']},
+  {inf:'oler',en:'to smell',p:['huelo','hueles','huele','olemos','oléis','huelen'],i:['olí','oliste','olió','olimos','olisteis','olieron'],m:['olía','olías','olía','olíamos','olíais','olían'],pp:'olido',s:['huela','huelas','huela','olamos','oláis','huelan']},
+  {inf:'reír',en:'to laugh',p:['río','ríes','ríe','reímos','reís','ríen'],i:['reí','reíste','rio','reímos','reísteis','rieron'],m:['reía','reías','reía','reíamos','reíais','reían'],pp:'reído',s:['ría','rías','ría','riamos','riais','rían'],f:'reir'},
+  {inf:'sonreír',en:'to smile',p:['sonrío','sonríes','sonríe','sonreímos','sonreís','sonríen'],i:['sonreí','sonreíste','sonrió','sonreímos','sonreísteis','sonrieron'],m:['sonreía','sonreías','sonreía','sonreíamos','sonreíais','sonreían'],pp:'sonreído',s:['sonría','sonrías','sonría','sonriamos','sonriáis','sonrían'],f:'sonreir'},
+  {inf:'valer',en:'to be worth',p:['valgo','vales','vale','valemos','valéis','valen'],i:['valí','valiste','valió','valimos','valisteis','valieron'],m:['valía','valías','valía','valíamos','valíais','valían'],pp:'valido',s:['valga','valgas','valga','valgamos','valgáis','valgan'],f:'valdr'},
+  {inf:'lucir',en:'to shine / show off',p:['luzco','luces','luce','lucimos','lucís','lucen'],i:['lucí','luciste','lució','lucimos','lucisteis','lucieron'],m:['lucía','lucías','lucía','lucíamos','lucíais','lucían'],pp:'lucido',s:['luzca','luzcas','luzca','luzcamos','luzcáis','luzcan']},
+  {inf:'bendecir',en:'to bless',p:['bendigo','bendices','bendice','bendecimos','bendecís','bendicen'],i:['bendije','bendijiste','bendijo','bendijimos','bendijisteis','bendijeron'],m:['bendecía','bendecías','bendecía','bendecíamos','bendecíais','bendecían'],pp:'bendecido',s:['bendiga','bendigas','bendiga','bendigamos','bendigáis','bendigan']},
+  {inf:'predecir',en:'to predict',p:['predigo','predices','predice','predecimos','predecís','predicen'],i:['predije','predijiste','predijo','predijimos','predijisteis','predijeron'],m:['predecía','predecías','predecía','predecíamos','predecíais','predecían'],pp:'predicho',s:['prediga','predigas','prediga','predigamos','predigáis','predigan'],f:'predir'},
+  {inf:'errar',en:'to err / to miss',p:['yerro','yerras','yerra','erramos','erráis','yerran'],i:['erré','erraste','erró','erramos','errasteis','erraron'],m:['erraba','errabas','erraba','errábamos','errabais','erraban'],pp:'errado',s:['yerre','yerres','yerre','erremos','erréis','yerren']},
+  // ── Added: verbs that follow RAE model paradigms (rae.es). Forms generated from the model pattern, then 15 key cells per verb checked against the DLE conjugation tables (dle.rae.es), 14 Oct 2026. ──
+  {inf:'mantener',en:'to maintain / keep',p:['mantengo', 'mantienes', 'mantiene', 'mantenemos', 'mantenéis', 'mantienen'],i:['mantuve', 'mantuviste', 'mantuvo', 'mantuvimos', 'mantuvisteis', 'mantuvieron'],m:['mantenía', 'mantenías', 'mantenía', 'manteníamos', 'manteníais', 'mantenían'],pp:'mantenido',s:['mantenga', 'mantengas', 'mantenga', 'mantengamos', 'mantengáis', 'mantengan'],f:'mantendr'},
+  {inf:'obtener',en:'to obtain',p:['obtengo', 'obtienes', 'obtiene', 'obtenemos', 'obtenéis', 'obtienen'],i:['obtuve', 'obtuviste', 'obtuvo', 'obtuvimos', 'obtuvisteis', 'obtuvieron'],m:['obtenía', 'obtenías', 'obtenía', 'obteníamos', 'obteníais', 'obtenían'],pp:'obtenido',s:['obtenga', 'obtengas', 'obtenga', 'obtengamos', 'obtengáis', 'obtengan'],f:'obtendr'},
+  {inf:'contener',en:'to contain',p:['contengo', 'contienes', 'contiene', 'contenemos', 'contenéis', 'contienen'],i:['contuve', 'contuviste', 'contuvo', 'contuvimos', 'contuvisteis', 'contuvieron'],m:['contenía', 'contenías', 'contenía', 'conteníamos', 'conteníais', 'contenían'],pp:'contenido',s:['contenga', 'contengas', 'contenga', 'contengamos', 'contengáis', 'contengan'],f:'contendr'},
+  {inf:'detener',en:'to stop / detain',p:['detengo', 'detienes', 'detiene', 'detenemos', 'detenéis', 'detienen'],i:['detuve', 'detuviste', 'detuvo', 'detuvimos', 'detuvisteis', 'detuvieron'],m:['detenía', 'detenías', 'detenía', 'deteníamos', 'deteníais', 'detenían'],pp:'detenido',s:['detenga', 'detengas', 'detenga', 'detengamos', 'detengáis', 'detengan'],f:'detendr'},
+  {inf:'sostener',en:'to hold / support',p:['sostengo', 'sostienes', 'sostiene', 'sostenemos', 'sostenéis', 'sostienen'],i:['sostuve', 'sostuviste', 'sostuvo', 'sostuvimos', 'sostuvisteis', 'sostuvieron'],m:['sostenía', 'sostenías', 'sostenía', 'sosteníamos', 'sosteníais', 'sostenían'],pp:'sostenido',s:['sostenga', 'sostengas', 'sostenga', 'sostengamos', 'sostengáis', 'sostengan'],f:'sostendr'},
+  {inf:'proponer',en:'to propose',p:['propongo', 'propones', 'propone', 'proponemos', 'proponéis', 'proponen'],i:['propuse', 'propusiste', 'propuso', 'propusimos', 'propusisteis', 'propusieron'],m:['proponía', 'proponías', 'proponía', 'proponíamos', 'proponíais', 'proponían'],pp:'propuesto',s:['proponga', 'propongas', 'proponga', 'propongamos', 'propongáis', 'propongan'],f:'propondr'},
+  {inf:'suponer',en:'to suppose',p:['supongo', 'supones', 'supone', 'suponemos', 'suponéis', 'suponen'],i:['supuse', 'supusiste', 'supuso', 'supusimos', 'supusisteis', 'supusieron'],m:['suponía', 'suponías', 'suponía', 'suponíamos', 'suponíais', 'suponían'],pp:'supuesto',s:['suponga', 'supongas', 'suponga', 'supongamos', 'supongáis', 'supongan'],f:'supondr'},
+  {inf:'componer',en:'to compose',p:['compongo', 'compones', 'compone', 'componemos', 'componéis', 'componen'],i:['compuse', 'compusiste', 'compuso', 'compusimos', 'compusisteis', 'compusieron'],m:['componía', 'componías', 'componía', 'componíamos', 'componíais', 'componían'],pp:'compuesto',s:['componga', 'compongas', 'componga', 'compongamos', 'compongáis', 'compongan'],f:'compondr'},
+  {inf:'imponer',en:'to impose',p:['impongo', 'impones', 'impone', 'imponemos', 'imponéis', 'imponen'],i:['impuse', 'impusiste', 'impuso', 'impusimos', 'impusisteis', 'impusieron'],m:['imponía', 'imponías', 'imponía', 'imponíamos', 'imponíais', 'imponían'],pp:'impuesto',s:['imponga', 'impongas', 'imponga', 'impongamos', 'impongáis', 'impongan'],f:'impondr'},
+  {inf:'disponer',en:'to have available / arrange',p:['dispongo', 'dispones', 'dispone', 'disponemos', 'disponéis', 'disponen'],i:['dispuse', 'dispusiste', 'dispuso', 'dispusimos', 'dispusisteis', 'dispusieron'],m:['disponía', 'disponías', 'disponía', 'disponíamos', 'disponíais', 'disponían'],pp:'dispuesto',s:['disponga', 'dispongas', 'disponga', 'dispongamos', 'dispongáis', 'dispongan'],f:'dispondr'},
+  {inf:'exponer',en:'to expose / exhibit',p:['expongo', 'expones', 'expone', 'exponemos', 'exponéis', 'exponen'],i:['expuse', 'expusiste', 'expuso', 'expusimos', 'expusisteis', 'expusieron'],m:['exponía', 'exponías', 'exponía', 'exponíamos', 'exponíais', 'exponían'],pp:'expuesto',s:['exponga', 'expongas', 'exponga', 'expongamos', 'expongáis', 'expongan'],f:'expondr'},
+  {inf:'convenir',en:'to suit / be advisable',p:['convengo', 'convienes', 'conviene', 'convenimos', 'convenís', 'convienen'],i:['convine', 'conviniste', 'convino', 'convinimos', 'convinisteis', 'convinieron'],m:['convenía', 'convenías', 'convenía', 'conveníamos', 'conveníais', 'convenían'],pp:'convenido',s:['convenga', 'convengas', 'convenga', 'convengamos', 'convengáis', 'convengan'],f:'convendr'},
+  {inf:'atraer',en:'to attract',p:['atraigo', 'atraes', 'atrae', 'atraemos', 'atraéis', 'atraen'],i:['atraje', 'atrajiste', 'atrajo', 'atrajimos', 'atrajisteis', 'atrajeron'],m:['atraía', 'atraías', 'atraía', 'atraíamos', 'atraíais', 'atraían'],pp:'atraído',s:['atraiga', 'atraigas', 'atraiga', 'atraigamos', 'atraigáis', 'atraigan']},
+  {inf:'distraer',en:'to distract',p:['distraigo', 'distraes', 'distrae', 'distraemos', 'distraéis', 'distraen'],i:['distraje', 'distrajiste', 'distrajo', 'distrajimos', 'distrajisteis', 'distrajeron'],m:['distraía', 'distraías', 'distraía', 'distraíamos', 'distraíais', 'distraían'],pp:'distraído',s:['distraiga', 'distraigas', 'distraiga', 'distraigamos', 'distraigáis', 'distraigan']},
+  {inf:'producir',en:'to produce',p:['produzco', 'produces', 'produce', 'producimos', 'producís', 'producen'],i:['produje', 'produjiste', 'produjo', 'produjimos', 'produjisteis', 'produjeron'],m:['producía', 'producías', 'producía', 'producíamos', 'producíais', 'producían'],pp:'producido',s:['produzca', 'produzcas', 'produzca', 'produzcamos', 'produzcáis', 'produzcan']},
+  {inf:'traducir',en:'to translate',p:['traduzco', 'traduces', 'traduce', 'traducimos', 'traducís', 'traducen'],i:['traduje', 'tradujiste', 'tradujo', 'tradujimos', 'tradujisteis', 'tradujeron'],m:['traducía', 'traducías', 'traducía', 'traducíamos', 'traducíais', 'traducían'],pp:'traducido',s:['traduzca', 'traduzcas', 'traduzca', 'traduzcamos', 'traduzcáis', 'traduzcan']},
+  {inf:'introducir',en:'to introduce / insert',p:['introduzco', 'introduces', 'introduce', 'introducimos', 'introducís', 'introducen'],i:['introduje', 'introdujiste', 'introdujo', 'introdujimos', 'introdujisteis', 'introdujeron'],m:['introducía', 'introducías', 'introducía', 'introducíamos', 'introducíais', 'introducían'],pp:'introducido',s:['introduzca', 'introduzcas', 'introduzca', 'introduzcamos', 'introduzcáis', 'introduzcan']},
+  {inf:'parecer',en:'to seem',p:['parezco', 'pareces', 'parece', 'parecemos', 'parecéis', 'parecen'],i:['parecí', 'pareciste', 'pareció', 'parecimos', 'parecisteis', 'parecieron'],m:['parecía', 'parecías', 'parecía', 'parecíamos', 'parecíais', 'parecían'],pp:'parecido',s:['parezca', 'parezcas', 'parezca', 'parezcamos', 'parezcáis', 'parezcan']},
+  {inf:'ofrecer',en:'to offer',p:['ofrezco', 'ofreces', 'ofrece', 'ofrecemos', 'ofrecéis', 'ofrecen'],i:['ofrecí', 'ofreciste', 'ofreció', 'ofrecimos', 'ofrecisteis', 'ofrecieron'],m:['ofrecía', 'ofrecías', 'ofrecía', 'ofrecíamos', 'ofrecíais', 'ofrecían'],pp:'ofrecido',s:['ofrezca', 'ofrezcas', 'ofrezca', 'ofrezcamos', 'ofrezcáis', 'ofrezcan']},
+  {inf:'crecer',en:'to grow',p:['crezco', 'creces', 'crece', 'crecemos', 'crecéis', 'crecen'],i:['crecí', 'creciste', 'creció', 'crecimos', 'crecisteis', 'crecieron'],m:['crecía', 'crecías', 'crecía', 'crecíamos', 'crecíais', 'crecían'],pp:'crecido',s:['crezca', 'crezcas', 'crezca', 'crezcamos', 'crezcáis', 'crezcan']},
+  {inf:'nacer',en:'to be born',p:['nazco', 'naces', 'nace', 'nacemos', 'nacéis', 'nacen'],i:['nací', 'naciste', 'nació', 'nacimos', 'nacisteis', 'nacieron'],m:['nacía', 'nacías', 'nacía', 'nacíamos', 'nacíais', 'nacían'],pp:'nacido',s:['nazca', 'nazcas', 'nazca', 'nazcamos', 'nazcáis', 'nazcan']},
+  {inf:'merecer',en:'to deserve',p:['merezco', 'mereces', 'merece', 'merecemos', 'merecéis', 'merecen'],i:['merecí', 'mereciste', 'mereció', 'merecimos', 'merecisteis', 'merecieron'],m:['merecía', 'merecías', 'merecía', 'merecíamos', 'merecíais', 'merecían'],pp:'merecido',s:['merezca', 'merezcas', 'merezca', 'merezcamos', 'merezcáis', 'merezcan']},
+  {inf:'reconocer',en:'to recognise',p:['reconozco', 'reconoces', 'reconoce', 'reconocemos', 'reconocéis', 'reconocen'],i:['reconocí', 'reconociste', 'reconoció', 'reconocimos', 'reconocisteis', 'reconocieron'],m:['reconocía', 'reconocías', 'reconocía', 'reconocíamos', 'reconocíais', 'reconocían'],pp:'reconocido',s:['reconozca', 'reconozcas', 'reconozca', 'reconozcamos', 'reconozcáis', 'reconozcan']},
+  {inf:'incluir',en:'to include',p:['incluyo', 'incluyes', 'incluye', 'incluimos', 'incluís', 'incluyen'],i:['incluí', 'incluiste', 'incluyó', 'incluimos', 'incluisteis', 'incluyeron'],m:['incluía', 'incluías', 'incluía', 'incluíamos', 'incluíais', 'incluían'],pp:'incluido',s:['incluya', 'incluyas', 'incluya', 'incluyamos', 'incluyáis', 'incluyan']},
+  {inf:'destruir',en:'to destroy',p:['destruyo', 'destruyes', 'destruye', 'destruimos', 'destruís', 'destruyen'],i:['destruí', 'destruiste', 'destruyó', 'destruimos', 'destruisteis', 'destruyeron'],m:['destruía', 'destruías', 'destruía', 'destruíamos', 'destruíais', 'destruían'],pp:'destruido',s:['destruya', 'destruyas', 'destruya', 'destruyamos', 'destruyáis', 'destruyan']},
+  {inf:'contribuir',en:'to contribute',p:['contribuyo', 'contribuyes', 'contribuye', 'contribuimos', 'contribuís', 'contribuyen'],i:['contribuí', 'contribuiste', 'contribuyó', 'contribuimos', 'contribuisteis', 'contribuyeron'],m:['contribuía', 'contribuías', 'contribuía', 'contribuíamos', 'contribuíais', 'contribuían'],pp:'contribuido',s:['contribuya', 'contribuyas', 'contribuya', 'contribuyamos', 'contribuyáis', 'contribuyan']},
+  {inf:'creer',en:'to believe / think',p:['creo', 'crees', 'cree', 'creemos', 'creéis', 'creen'],i:['creí', 'creíste', 'creyó', 'creímos', 'creísteis', 'creyeron'],m:['creía', 'creías', 'creía', 'creíamos', 'creíais', 'creían'],pp:'creído',s:['crea', 'creas', 'crea', 'creamos', 'creáis', 'crean']},
+  {inf:'poseer',en:'to possess',p:['poseo', 'posees', 'posee', 'poseemos', 'poseéis', 'poseen'],i:['poseí', 'poseíste', 'poseyó', 'poseímos', 'poseísteis', 'poseyeron'],m:['poseía', 'poseías', 'poseía', 'poseíamos', 'poseíais', 'poseían'],pp:'poseído',s:['posea', 'poseas', 'posea', 'poseamos', 'poseáis', 'posean']},
+  {inf:'preferir',en:'to prefer',p:['prefiero', 'prefieres', 'prefiere', 'preferimos', 'preferís', 'prefieren'],i:['preferí', 'preferiste', 'prefirió', 'preferimos', 'preferisteis', 'prefirieron'],m:['prefería', 'preferías', 'prefería', 'preferíamos', 'preferíais', 'preferían'],pp:'preferido',s:['prefiera', 'prefieras', 'prefiera', 'prefiramos', 'prefiráis', 'prefieran']},
+  {inf:'convertir',en:'to convert / turn into',p:['convierto', 'conviertes', 'convierte', 'convertimos', 'convertís', 'convierten'],i:['convertí', 'convertiste', 'convirtió', 'convertimos', 'convertisteis', 'convirtieron'],m:['convertía', 'convertías', 'convertía', 'convertíamos', 'convertíais', 'convertían'],pp:'convertido',s:['convierta', 'conviertas', 'convierta', 'convirtamos', 'convirtáis', 'conviertan']},
+  {inf:'mentir',en:'to lie',p:['miento', 'mientes', 'miente', 'mentimos', 'mentís', 'mienten'],i:['mentí', 'mentiste', 'mintió', 'mentimos', 'mentisteis', 'mintieron'],m:['mentía', 'mentías', 'mentía', 'mentíamos', 'mentíais', 'mentían'],pp:'mentido',s:['mienta', 'mientas', 'mienta', 'mintamos', 'mintáis', 'mientan']},
+  {inf:'sugerir',en:'to suggest',p:['sugiero', 'sugieres', 'sugiere', 'sugerimos', 'sugerís', 'sugieren'],i:['sugerí', 'sugeriste', 'sugirió', 'sugerimos', 'sugeristeis', 'sugirieron'],m:['sugería', 'sugerías', 'sugería', 'sugeríamos', 'sugeríais', 'sugerían'],pp:'sugerido',s:['sugiera', 'sugieras', 'sugiera', 'sugiramos', 'sugiráis', 'sugieran']},
+  {inf:'divertir',en:'to amuse / entertain',p:['divierto', 'diviertes', 'divierte', 'divertimos', 'divertís', 'divierten'],i:['divertí', 'divertiste', 'divirtió', 'divertimos', 'divertisteis', 'divirtieron'],m:['divertía', 'divertías', 'divertía', 'divertíamos', 'divertíais', 'divertían'],pp:'divertido',s:['divierta', 'diviertas', 'divierta', 'divirtamos', 'divirtáis', 'diviertan']},
+  {inf:'servir',en:'to serve',p:['sirvo', 'sirves', 'sirve', 'servimos', 'servís', 'sirven'],i:['serví', 'serviste', 'sirvió', 'servimos', 'servisteis', 'sirvieron'],m:['servía', 'servías', 'servía', 'servíamos', 'servíais', 'servían'],pp:'servido',s:['sirva', 'sirvas', 'sirva', 'sirvamos', 'sirváis', 'sirvan']},
+  {inf:'repetir',en:'to repeat',p:['repito', 'repites', 'repite', 'repetimos', 'repetís', 'repiten'],i:['repetí', 'repetiste', 'repitió', 'repetimos', 'repetisteis', 'repitieron'],m:['repetía', 'repetías', 'repetía', 'repetíamos', 'repetíais', 'repetían'],pp:'repetido',s:['repita', 'repitas', 'repita', 'repitamos', 'repitáis', 'repitan']},
+  {inf:'vestir',en:'to dress',p:['visto', 'vistes', 'viste', 'vestimos', 'vestís', 'visten'],i:['vestí', 'vestiste', 'vistió', 'vestimos', 'vestisteis', 'vistieron'],m:['vestía', 'vestías', 'vestía', 'vestíamos', 'vestíais', 'vestían'],pp:'vestido',s:['vista', 'vistas', 'vista', 'vistamos', 'vistáis', 'vistan']},
+  {inf:'medir',en:'to measure',p:['mido', 'mides', 'mide', 'medimos', 'medís', 'miden'],i:['medí', 'mediste', 'midió', 'medimos', 'medisteis', 'midieron'],m:['medía', 'medías', 'medía', 'medíamos', 'medíais', 'medían'],pp:'medido',s:['mida', 'midas', 'mida', 'midamos', 'midáis', 'midan']},
+  {inf:'seguir',en:'to follow / continue',p:['sigo', 'sigues', 'sigue', 'seguimos', 'seguís', 'siguen'],i:['seguí', 'seguiste', 'siguió', 'seguimos', 'seguisteis', 'siguieron'],m:['seguía', 'seguías', 'seguía', 'seguíamos', 'seguíais', 'seguían'],pp:'seguido',s:['siga', 'sigas', 'siga', 'sigamos', 'sigáis', 'sigan']},
+  {inf:'elegir',en:'to choose',p:['elijo', 'eliges', 'elige', 'elegimos', 'elegís', 'eligen'],i:['elegí', 'elegiste', 'eligió', 'elegimos', 'elegisteis', 'eligieron'],m:['elegía', 'elegías', 'elegía', 'elegíamos', 'elegíais', 'elegían'],pp:'elegido',s:['elija', 'elijas', 'elija', 'elijamos', 'elijáis', 'elijan']},
+  {inf:'corregir',en:'to correct',p:['corrijo', 'corriges', 'corrige', 'corregimos', 'corregís', 'corrigen'],i:['corregí', 'corregiste', 'corrigió', 'corregimos', 'corregisteis', 'corrigieron'],m:['corregía', 'corregías', 'corregía', 'corregíamos', 'corregíais', 'corregían'],pp:'corregido',s:['corrija', 'corrijas', 'corrija', 'corrijamos', 'corrijáis', 'corrijan']},
+  {inf:'morir',en:'to die',p:['muero', 'mueres', 'muere', 'morimos', 'morís', 'mueren'],i:['morí', 'moriste', 'murió', 'morimos', 'moristeis', 'murieron'],m:['moría', 'morías', 'moría', 'moríamos', 'moríais', 'morían'],pp:'muerto',s:['muera', 'mueras', 'muera', 'muramos', 'muráis', 'mueran']},
+  {inf:'mostrar',en:'to show',p:['muestro', 'muestras', 'muestra', 'mostramos', 'mostráis', 'muestran'],i:['mostré', 'mostraste', 'mostró', 'mostramos', 'mostrasteis', 'mostraron'],m:['mostraba', 'mostrabas', 'mostraba', 'mostrábamos', 'mostrabais', 'mostraban'],pp:'mostrado',s:['muestre', 'muestres', 'muestre', 'mostremos', 'mostréis', 'muestren']},
+  {inf:'probar',en:'to try / taste',p:['pruebo', 'pruebas', 'prueba', 'probamos', 'probáis', 'prueban'],i:['probé', 'probaste', 'probó', 'probamos', 'probasteis', 'probaron'],m:['probaba', 'probabas', 'probaba', 'probábamos', 'probabais', 'probaban'],pp:'probado',s:['pruebe', 'pruebes', 'pruebe', 'probemos', 'probéis', 'prueben']},
+  {inf:'soñar',en:'to dream',p:['sueño', 'sueñas', 'sueña', 'soñamos', 'soñáis', 'sueñan'],i:['soñé', 'soñaste', 'soñó', 'soñamos', 'soñasteis', 'soñaron'],m:['soñaba', 'soñabas', 'soñaba', 'soñábamos', 'soñabais', 'soñaban'],pp:'soñado',s:['sueñe', 'sueñes', 'sueñe', 'soñemos', 'soñéis', 'sueñen']},
+  {inf:'volar',en:'to fly',p:['vuelo', 'vuelas', 'vuela', 'volamos', 'voláis', 'vuelan'],i:['volé', 'volaste', 'voló', 'volamos', 'volasteis', 'volaron'],m:['volaba', 'volabas', 'volaba', 'volábamos', 'volabais', 'volaban'],pp:'volado',s:['vuele', 'vueles', 'vuele', 'volemos', 'voléis', 'vuelen']},
+  {inf:'almorzar',en:'to have lunch',p:['almuerzo', 'almuerzas', 'almuerza', 'almorzamos', 'almorzáis', 'almuerzan'],i:['almorcé', 'almorzaste', 'almorzó', 'almorzamos', 'almorzasteis', 'almorzaron'],m:['almorzaba', 'almorzabas', 'almorzaba', 'almorzábamos', 'almorzabais', 'almorzaban'],pp:'almorzado',s:['almuerce', 'almuerces', 'almuerce', 'almorcemos', 'almorcéis', 'almuercen']},
+  {inf:'comenzar',en:'to begin',p:['comienzo', 'comienzas', 'comienza', 'comenzamos', 'comenzáis', 'comienzan'],i:['comencé', 'comenzaste', 'comenzó', 'comenzamos', 'comenzasteis', 'comenzaron'],m:['comenzaba', 'comenzabas', 'comenzaba', 'comenzábamos', 'comenzabais', 'comenzaban'],pp:'comenzado',s:['comience', 'comiences', 'comience', 'comencemos', 'comencéis', 'comiencen']},
+  {inf:'pensar',en:'to think',p:['pienso', 'piensas', 'piensa', 'pensamos', 'pensáis', 'piensan'],i:['pensé', 'pensaste', 'pensó', 'pensamos', 'pensasteis', 'pensaron'],m:['pensaba', 'pensabas', 'pensaba', 'pensábamos', 'pensabais', 'pensaban'],pp:'pensado',s:['piense', 'pienses', 'piense', 'pensemos', 'penséis', 'piensen']},
+  {inf:'despertar',en:'to wake up (sb)',p:['despierto', 'despiertas', 'despierta', 'despertamos', 'despertáis', 'despiertan'],i:['desperté', 'despertaste', 'despertó', 'despertamos', 'despertasteis', 'despertaron'],m:['despertaba', 'despertabas', 'despertaba', 'despertábamos', 'despertabais', 'despertaban'],pp:'despertado',s:['despierte', 'despiertes', 'despierte', 'despertemos', 'despertéis', 'despierten']},
+  {inf:'negar',en:'to deny',p:['niego', 'niegas', 'niega', 'negamos', 'negáis', 'niegan'],i:['negué', 'negaste', 'negó', 'negamos', 'negasteis', 'negaron'],m:['negaba', 'negabas', 'negaba', 'negábamos', 'negabais', 'negaban'],pp:'negado',s:['niegue', 'niegues', 'niegue', 'neguemos', 'neguéis', 'nieguen']},
+  {inf:'devolver',en:'to return (sth)',p:['devuelvo', 'devuelves', 'devuelve', 'devolvemos', 'devolvéis', 'devuelven'],i:['devolví', 'devolviste', 'devolvió', 'devolvimos', 'devolvisteis', 'devolvieron'],m:['devolvía', 'devolvías', 'devolvía', 'devolvíamos', 'devolvíais', 'devolvían'],pp:'devuelto',s:['devuelva', 'devuelvas', 'devuelva', 'devolvamos', 'devolváis', 'devuelvan']},
+  {inf:'resolver',en:'to solve / resolve',p:['resuelvo', 'resuelves', 'resuelve', 'resolvemos', 'resolvéis', 'resuelven'],i:['resolví', 'resolviste', 'resolvió', 'resolvimos', 'resolvisteis', 'resolvieron'],m:['resolvía', 'resolvías', 'resolvía', 'resolvíamos', 'resolvíais', 'resolvían'],pp:'resuelto',s:['resuelva', 'resuelvas', 'resuelva', 'resolvamos', 'resolváis', 'resuelvan']},
+  {inf:'defender',en:'to defend',p:['defiendo', 'defiendes', 'defiende', 'defendemos', 'defendéis', 'defienden'],i:['defendí', 'defendiste', 'defendió', 'defendimos', 'defendisteis', 'defendieron'],m:['defendía', 'defendías', 'defendía', 'defendíamos', 'defendíais', 'defendían'],pp:'defendido',s:['defienda', 'defiendas', 'defienda', 'defendamos', 'defendáis', 'defiendan']},
+  {inf:'encender',en:'to turn on / light',p:['enciendo', 'enciendes', 'enciende', 'encendemos', 'encendéis', 'encienden'],i:['encendí', 'encendiste', 'encendió', 'encendimos', 'encendisteis', 'encendieron'],m:['encendía', 'encendías', 'encendía', 'encendíamos', 'encendíais', 'encendían'],pp:'encendido',s:['encienda', 'enciendas', 'encienda', 'encendamos', 'encendáis', 'enciendan']},
+  {inf:'atender',en:'to attend to / serve',p:['atiendo', 'atiendes', 'atiende', 'atendemos', 'atendéis', 'atienden'],i:['atendí', 'atendiste', 'atendió', 'atendimos', 'atendisteis', 'atendieron'],m:['atendía', 'atendías', 'atendía', 'atendíamos', 'atendíais', 'atendían'],pp:'atendido',s:['atienda', 'atiendas', 'atienda', 'atendamos', 'atendáis', 'atiendan']},
+];
+
+// ════════════════ CONJUGATION ════════════════
+const FUT_END  = ['é','ás','á','emos','éis','án'];
+const COND_END = ['ía','ías','ía','íamos','íais','ían'];
+
+function regularForms(v, tense) {
+  const stem = v.inf.slice(0,-2), t = v.type;
+  const T = {
+    presente:   {ar:['o','as','a','amos','áis','an'],     er:['o','es','e','emos','éis','en'],     ir:['o','es','e','imos','ís','en']},
+    indefinido: {ar:['é','aste','ó','amos','asteis','aron'],er:['í','iste','ió','imos','isteis','ieron'],ir:['í','iste','ió','imos','isteis','ieron']},
+    imperfecto: {ar:['aba','abas','aba','ábamos','abais','aban'],er:['ía','ías','ía','íamos','íais','ían'],ir:['ía','ías','ía','íamos','íais','ían']},
+    subjuntivo: {ar:['e','es','e','emos','éis','en'],       er:['a','as','a','amos','áis','an'],     ir:['a','as','a','amos','áis','an']},
+  };
+  if (tense==='futuro')     return FUT_END.map(e=>v.inf+e);
+  if (tense==='condicional')return COND_END.map(e=>v.inf+e);
+  if (tense==='perfecto') {
+    const pp = t==='ar' ? stem+'ado' : stem+'ido';
+    return HABER_PRES.map(h=>h+' '+pp);
+  }
+  return T[tense][t].map(e=>stem+e);
+}
+
+function irregularForms(v, tense) {
+  const stem = v.f || v.inf;
+  if (tense==='presente')    return v.p;
+  if (tense==='indefinido')  return v.i;
+  if (tense==='imperfecto')  return v.m;
+  if (tense==='futuro')      return FUT_END.map(e=>stem+e);
+  if (tense==='condicional') return COND_END.map(e=>stem+e);
+  if (tense==='perfecto')    return HABER_PRES.map(h=>h+' '+v.pp);
+  if (tense==='subjuntivo')  return v.s;
+}
+
+function formsFor(v, tense) {
+  return v.p ? irregularForms(v, tense) : regularForms(v, tense);
+}
+
+const TENSE_INFO = {
+  presente:   {label:'🌱 Presente',        short:'Presente'},
+  indefinido: {label:'📜 Indefinido',      short:'Indefinido'},
+  imperfecto: {label:'🌀 Imperfecto',      short:'Imperfecto'},
+  futuro:     {label:'🚀 Futuro',          short:'Futuro'},
+  condicional:{label:'💭 Condicional',     short:'Condicional'},
+  perfecto:   {label:'✅ Pret. perfecto',  short:'Pretérito perfecto compuesto'},
+  subjuntivo: {label:'🤍 Subj. presente',  short:'Presente de subjuntivo'},
+};
+const ALL_TENSES = Object.keys(TENSE_INFO);
+
+// Verb counts on the home screen are computed from the data so they never go stale.
+document.getElementById('cnt-all').textContent=`${REGULAR.length+IRREGULAR.length} verbos`;
+document.getElementById('cnt-reg').textContent=`${REGULAR.length} verbos`;
+document.getElementById('cnt-irr').textContent=`${IRREGULAR.length} verbos`;
+
+// ════════════════ STATE ════════════════
+let selectedTense='presente', selectedVerbs='all';
+let roundTense='presente';
+let questions=[], qIndex=0;
+let correctCount=0, wrongCount=0, streak=0, bestStreak=0;
+let mistakes=[];   // wrong answers of the current round, in question order
+let totalAnswered=0, totalCorrect=0;
+const QUIZ_LEN=10;
+
+try{
+  const s=JSON.parse(localStorage.getItem('conjugaes')||'{}');
+  totalAnswered=s.total||0; totalCorrect=s.correct||0; bestStreak=s.streak||0;
+  updateHomeStats();
+}catch(e){}
+
+// ════════════════ INSTALL MODAL ════════════════
+function openInstallModal(){ document.getElementById('install-modal').classList.add('open'); }
+function closeInstallModal(){ document.getElementById('install-modal').classList.remove('open'); }
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('install-modal')) closeInstallModal();
+}
+
+// ════════════════ SELECTORS ════════════════
+function selectTense(el){
+  document.querySelectorAll('[data-tense]').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected'); selectedTense=el.dataset.tense;
+}
+function selectVerbs(el){
+  document.querySelectorAll('[data-verbs]').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected'); selectedVerbs=el.dataset.verbs;
+}
+
+// ════════════════ BUILD ROUND ════════════════
+// The tense is chosen ONCE per round and stays fixed for all 10 questions.
+function buildQuestions(tense){
+  const verbPool = selectedVerbs==='irr' ? IRREGULAR
+                 : selectedVerbs==='reg' ? REGULAR
+                 : [...REGULAR, ...IRREGULAR];
+  const picked=[], seen=new Set();
+  let guard=0;
+  while(picked.length<QUIZ_LEN && guard<2000){
+    guard++;
+    const v=verbPool[Math.floor(Math.random()*verbPool.length)];
+    const pi=Math.floor(Math.random()*6);
+    const key=v.inf+'|'+pi;
+    if(seen.has(key)) continue;
+    seen.add(key);
+    const forms=formsFor(v,tense);
+    picked.push({
+      verb:v.inf, meaning:v.en, pronIdx:pi, tense,
+      answer:forms[pi], allForms:forms,
+      note: v.p ? `Verbo irregular · ${v.en}` : `Verbo regular -${v.type} · ${v.en}`
+    });
+  }
+  return picked;
+}
+
+// ════════════════ QUIZ FLOW ════════════════
+function startQuiz(){
+  roundTense = selectedTense==='mix'
+    ? ALL_TENSES[Math.floor(Math.random()*ALL_TENSES.length)]
+    : selectedTense;
+  questions=buildQuestions(roundTense);
+  qIndex=0; correctCount=0; wrongCount=0; streak=0; mistakes=[];
+  showScreen('quiz'); loadQuestion();
+}
+
+function loadQuestion(){
+  const q=questions[qIndex];
+  document.getElementById('prog-fill').style.width=`${(qIndex/QUIZ_LEN)*100}%`;
+  document.getElementById('prog-label').textContent=`${qIndex} / ${QUIZ_LEN}`;
+  document.getElementById('streak-num').textContent=streak;
+  document.getElementById('tense-tag').textContent=TENSE_INFO[q.tense].label;
+  document.getElementById('q-verb').textContent=q.verb;
+  document.getElementById('q-meaning').textContent=q.meaning;
+  document.getElementById('q-pronoun').textContent=PRONOUNS[q.pronIdx];
+  document.getElementById('q-tense-ctx').textContent=TENSE_INFO[q.tense].short;
+
+  const inp=document.getElementById('answer-input');
+  inp.value=''; inp.className='answer-input'; inp.disabled=false;
+  document.getElementById('feedback-box').className='feedback-box';
+  document.getElementById('full-conj').classList.remove('visible');
+  document.getElementById('next-btn').classList.remove('visible');
+  document.getElementById('quiz-card-area').scrollTop=0;
+  setTimeout(()=>inp.focus(),130);
+}
+
+function checkAnswer(){
+  const q=questions[qIndex];
+  const inp=document.getElementById('answer-input');
+  const val=inp.value.trim();
+  if(!val) return;
+
+  // Accents count: "e" for "é" is wrong. Only case and surrounding spaces are ignored.
+  const exact = val.normalize('NFC').toLowerCase().replace(/\s+/g,' ')===
+                q.answer.normalize('NFC').toLowerCase();
+  const accentOnly = !exact && normalize(val)===normalize(q.answer);
+  const isRight = exact;
+  inp.disabled=true;
+  const fb=document.getElementById('feedback-box');
+
+  if(isRight){
+    inp.className='answer-input correct';
+    fb.className='feedback-box correct';
+    document.getElementById('fb-title').textContent='¡Correcto! ✓';
+    document.getElementById('fb-your').textContent='';
+    document.getElementById('fb-note').textContent=q.note;
+    correctCount++; streak++;
+    if(streak>bestStreak) bestStreak=streak;
+  } else {
+    inp.className='answer-input wrong';
+    fb.className='feedback-box wrong';
+    document.getElementById('fb-title').textContent='Incorrecto ✗';
+    document.getElementById('fb-your').textContent=`Escribiste: ${val}`;
+    document.getElementById('fb-note').textContent = accentOnly
+      ? `⚠️ Acento incorrecto. La forma correcta es: ${q.answer}`
+      : q.note;
+    wrongCount++; streak=0;
+    mistakes.push({n:qIndex+1, verb:q.verb, meaning:q.meaning, pron:PRONOUNS[q.pronIdx],
+                   tense:TENSE_INFO[q.tense].short, yours:val, correct:q.answer, accentOnly});
+    document.getElementById('qcard').classList.add('shake');
+    setTimeout(()=>document.getElementById('qcard').classList.remove('shake'),400);
+    buildConjTable(q);
+    document.getElementById('full-conj').classList.add('visible');
+  }
+
+  document.getElementById('streak-num').textContent=streak;
+  const nb=document.getElementById('next-btn');
+  nb.classList.add('visible');
+  nb.textContent=qIndex+1>=QUIZ_LEN?'Ver resultados →':'Siguiente →';
+
+  setTimeout(()=>{
+    const area=document.getElementById('quiz-card-area');
+    area.scrollTo({top:area.scrollHeight,behavior:'smooth'});
+  },250);
+}
+
+function buildConjTable(q){
+  document.getElementById('fc-label').textContent=`${q.verb} · ${TENSE_INFO[q.tense].short}`;
+  const tbody=document.getElementById('fc-tbody');
+  tbody.innerHTML='';
+  PRONOUNS.forEach((pron,i)=>{
+    const form=q.allForms[i]||'—';
+    const isTarget=i===q.pronIdx;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="conj-pron">${pron}</td>
+      <td>
+        <span class="conj-form${isTarget?' target':''}">${form}</span>
+        ${isTarget?`<span class="conj-tag">← respuesta correcta</span>`:''}
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function normalize(s){
+  return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+}
+
+function nextQuestion(){
+  qIndex++;
+  if(qIndex>=QUIZ_LEN){ showResults(); return; }
+  loadQuestion();
+}
+
+function insertChar(c){
+  const inp=document.getElementById('answer-input');
+  if(inp.disabled) return;
+  const start=inp.selectionStart ?? inp.value.length;
+  const end=inp.selectionEnd ?? inp.value.length;
+  inp.value=inp.value.slice(0,start)+c+inp.value.slice(end);
+  inp.focus();
+  inp.setSelectionRange(start+c.length,start+c.length);
+}
+
+// ════════════════ RESULTS ════════════════
+function showResults(){
+  const pct=Math.round((correctCount/QUIZ_LEN)*100);
+  totalAnswered+=QUIZ_LEN; totalCorrect+=correctCount;
+  try{localStorage.setItem('conjugaes',JSON.stringify(
+    {total:totalAnswered,correct:totalCorrect,streak:bestStreak}));}catch(e){}
+  updateHomeStats();
+
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('r-correct').textContent=correctCount;
+  document.getElementById('r-wrong').textContent=wrongCount;
+  document.getElementById('r-streak').textContent=bestStreak;
+  document.getElementById('score-arc').style.strokeDashoffset=377-(377*pct/100);
+
+  const emojis=pct>=90?'🏆':pct>=70?'🎉':pct>=50?'💪':'📚';
+  const titles=pct>=90?'¡Perfecto!':pct>=70?'¡Muy bien!':pct>=50?'¡Bien!':'¡Sigue practicando!';
+  document.getElementById('result-emoji').textContent=emojis;
+  document.getElementById('result-title').textContent=titles;
+  document.getElementById('result-sub').textContent=
+    `${TENSE_INFO[roundTense].short} · ${correctCount} de ${QUIZ_LEN} correctas · ${pct}%`;
+  renderReview();
+  document.getElementById('results').scrollTop=0;
+  showScreen('results');
+}
+
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+// Highlights the characters that differ (only when both words have the same length).
+function diffHtml(word, other){
+  if(word.length!==other.length) return esc(word);
+  return [...word].map((ch,i)=>ch.toLowerCase()===other[i].toLowerCase()?esc(ch):`<span class="rv-diff">${esc(ch)}</span>`).join('');
+}
+
+function renderReview(){
+  const box=document.getElementById('review');
+  if(!mistakes.length){
+    box.innerHTML='<div class="review-title">Repaso</div><div class="review-empty">¡Ronda sin errores! 🎉</div>';
+    return;
+  }
+  box.innerHTML=`<div class="review-title">Repasa tus errores · ${mistakes.length}</div>`+
+    mistakes.map(m=>`
+      <div class="rv-item">
+        <div class="rv-head"><span class="rv-num">#${m.n}</span><span class="rv-verb">${esc(m.verb)}</span><span class="rv-meaning">${esc(m.meaning)}</span></div>
+        <div class="rv-ctx">${esc(m.pron)} → ${esc(m.tense)}</div>
+        <div class="rv-row"><span class="rv-lbl">Tu respuesta</span><span class="rv-wrong">${diffHtml(m.yours,m.correct)}</span></div>
+        <div class="rv-row"><span class="rv-lbl">Correcta</span><span class="rv-right">${diffHtml(m.correct,m.yours)}</span></div>
+        ${m.accentOnly?'<div class="rv-note">⚠️ Solo el acento era incorrecto</div>':''}
+      </div>`).join('');
+}
+
+function updateHomeStats(){
+  document.getElementById('stat-total').textContent=totalAnswered;
+  document.getElementById('stat-streak').textContent=bestStreak;
+  document.getElementById('stat-acc').textContent=
+    totalAnswered>0?Math.round((totalCorrect/totalAnswered)*100)+'%':'—';
+}
+
+// ════════════════ NAVIGATION ════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>
+    s.classList.toggle('hidden',s.id!==id));
+}
+function goHome(){ showScreen('home'); }
+</script>
+</body>
+</html>
