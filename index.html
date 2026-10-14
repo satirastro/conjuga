@@ -102,6 +102,19 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
 .ih-sub{font-size:.58rem;color:var(--muted);margin-top:1px;}
 .ih-arrow{font-size:1rem;color:var(--muted);}
 
+/* Weak spots (verbs the player got wrong) */
+.weak-box{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:11px;width:100%;
+  background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:10px 12px;}
+.weak-box.has-weak{border-color:rgba(245,138,60,.45);}
+.wk-text{flex:1;text-align:left;}
+.wk-title{font-size:.74rem;font-weight:700;color:var(--text);}
+.wk-sub{font-size:.58rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+.wk-btn{display:none;flex:1 1 100%;padding:10px 12px;border-radius:10px;border:1px solid var(--gold);
+  background:rgba(245,138,60,.14);color:var(--gold2);font-family:'Syne',sans-serif;
+  font-size:.64rem;font-weight:800;letter-spacing:.4px;cursor:pointer;transition:all .15s;}
+.wk-btn:active{transform:scale(.96);}
+.weak-box.has-weak .wk-btn{display:block;}
+
 /* ── QUIZ ── */
 #quiz{padding-top:var(--safe-top);padding-bottom:var(--safe-bot);}
 .quiz-header{display:flex;align-items:center;justify-content:space-between;padding:11px 17px 7px;}
@@ -329,6 +342,15 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
 
   <button class="start-btn" onclick="startQuiz()">Empezar →</button>
 
+  <div class="weak-box" id="weak-box">
+    <span class="ih-icon">🎯</span>
+    <div class="wk-text">
+      <div class="wk-title">Tus puntos débiles</div>
+      <div class="wk-sub" id="wk-sub">Aún no hay errores. ¡Sigue así!</div>
+    </div>
+    <button class="wk-btn" onclick="startReview()">Repasar mis errores</button>
+  </div>
+
   <div class="stats-row">
     <div class="stat-chip"><div class="sv" id="stat-total">0</div><div class="sl">Respondidas</div></div>
     <div class="stat-chip"><div class="sv" id="stat-streak">0</div><div class="sl">Mejor racha</div></div>
@@ -446,7 +468,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
     <div class="rs-chip gold"><div class="rv" id="r-streak">0</div><div class="rl">Mejor racha</div></div>
   </div>
   <div class="result-actions">
-    <button class="r-btn-primary" onclick="startQuiz()">Jugar otra vez</button>
+    <button class="r-btn-primary" onclick="playAgain()">Jugar otra vez</button>
     <button class="r-btn-sec" onclick="goHome()">← Volver al menú</button>
   </div>
   <div class="review" id="review"></div>
@@ -839,12 +861,66 @@ let correctCount=0, wrongCount=0, streak=0, bestStreak=0;
 let mistakes=[];   // wrong answers of the current round, in question order
 let totalAnswered=0, totalCorrect=0;
 const QUIZ_LEN=10;
+const WEAK_PER_ROUND=4;          // max questions per normal round taken from the player's weak spots
+const WEAK_MISS=2, WEAK_HIT=1, WEAK_MAX=6;
+let quizLen=QUIZ_LEN, reviewMode=false;
+
+// Weak spots: score per "verb|tense". A mistake adds points, a correct answer removes them.
+// Stored only on this device (localStorage); nothing is sent anywhere.
+const WEAK_KEY='conjugaes_weak';
+const VERB_BY_INF=new Map([...REGULAR,...IRREGULAR].map(v=>[v.inf,v]));
+let weak={};
+try{
+  const w=JSON.parse(localStorage.getItem(WEAK_KEY)||'{}');
+  if(w&&typeof w==='object') weak=w;
+}catch(e){}
+
+function saveWeak(){ try{localStorage.setItem(WEAK_KEY,JSON.stringify(weak));}catch(e){} }
+
+function recordResult(verb,tense,isRight){
+  const k=verb+'|'+tense;
+  const cur=weak[k]||0;
+  const next=isRight ? cur-WEAK_HIT : Math.min(WEAK_MAX,cur+WEAK_MISS);
+  if(next<=0) delete weak[k]; else weak[k]=next;
+  saveWeak();
+}
+
+// Valid weak entries as {v,tense,score}; optionally limited to one tense and a verb pool.
+function weakEntries(tense,pool){
+  const out=[];
+  for(const [k,score] of Object.entries(weak)){
+    const [inf,t]=k.split('|');
+    const v=VERB_BY_INF.get(inf);
+    if(!v||!TENSE_INFO[t]||!(score>0)) continue;
+    if(tense&&t!==tense) continue;
+    if(pool&&!pool.includes(v)) continue;
+    out.push({v,tense:t,score});
+  }
+  return out;
+}
+
+function pickWeighted(list){
+  let r=Math.random()*list.reduce((s,e)=>s+e.score,0);
+  for(const e of list){ r-=e.score; if(r<=0) return e; }
+  return list[list.length-1];
+}
+
+function renderWeakBox(){
+  const entries=weakEntries();
+  const box=document.getElementById('weak-box');
+  const verbs=new Set(entries.map(e=>e.v.inf)).size;
+  box.classList.toggle('has-weak',verbs>0);
+  document.getElementById('wk-sub').textContent = verbs
+    ? `${verbs} ${verbs===1?'verbo por repasar':'verbos por repasar'} · hasta ${WEAK_PER_ROUND} en cada ronda`
+    : 'Aún no hay errores. ¡Sigue así!';
+}
 
 try{
   const s=JSON.parse(localStorage.getItem('conjugaes')||'{}');
   totalAnswered=s.total||0; totalCorrect=s.correct||0; bestStreak=s.streak||0;
   updateHomeStats();
 }catch(e){}
+renderWeakBox();
 
 // ════════════════ INSTALL MODAL ════════════════
 function openInstallModal(){ document.getElementById('install-modal').classList.add('open'); }
@@ -865,25 +941,66 @@ function selectVerbs(el){
 
 // ════════════════ BUILD ROUND ════════════════
 // The tense is chosen ONCE per round and stays fixed for all 10 questions.
+function makeQuestion(v,tense,pi){
+  const forms=formsFor(v,tense);
+  return {
+    verb:v.inf, meaning:v.en, pronIdx:pi, tense,
+    answer:forms[pi], allForms:forms,
+    note: v.p ? `Verbo irregular · ${v.en}` : `Verbo regular -${v.type} · ${v.en}`
+  };
+}
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+// Normal round: up to WEAK_PER_ROUND questions from weak spots (different verbs, weighted by
+// how often they were missed), the rest random. Then shuffled so weak ones are spread out.
 function buildQuestions(tense){
   const verbPool = selectedVerbs==='irr' ? IRREGULAR
                  : selectedVerbs==='reg' ? REGULAR
                  : [...REGULAR, ...IRREGULAR];
-  const picked=[], seen=new Set();
+  const picked=[], seen=new Set(), usedVerbs=new Set();
+
+  let weakPool=weakEntries(tense,verbPool);
+  while(picked.length<WEAK_PER_ROUND && weakPool.length){
+    const e=pickWeighted(weakPool);
+    weakPool=weakPool.filter(x=>x!==e);
+    if(usedVerbs.has(e.v.inf)) continue;
+    usedVerbs.add(e.v.inf);
+    const pi=Math.floor(Math.random()*6);
+    seen.add(e.v.inf+'|'+tense+'|'+pi);
+    picked.push(makeQuestion(e.v,tense,pi));
+  }
+
   let guard=0;
   while(picked.length<QUIZ_LEN && guard<2000){
     guard++;
     const v=verbPool[Math.floor(Math.random()*verbPool.length)];
     const pi=Math.floor(Math.random()*6);
-    const key=v.inf+'|'+pi;
+    const key=v.inf+'|'+tense+'|'+pi;
     if(seen.has(key)) continue;
     seen.add(key);
-    const forms=formsFor(v,tense);
-    picked.push({
-      verb:v.inf, meaning:v.en, pronIdx:pi, tense,
-      answer:forms[pi], allForms:forms,
-      note: v.p ? `Verbo irregular · ${v.en}` : `Verbo regular -${v.type} · ${v.en}`
-    });
+    picked.push(makeQuestion(v,tense,pi));
+  }
+  return shuffle(picked);
+}
+
+// Review round: only weak spots (any tense), weighted by score. Shorter if there are few.
+function buildReviewQuestions(){
+  const entries=weakEntries();
+  const want=Math.min(QUIZ_LEN,entries.length*6);
+  const picked=[], seen=new Set();
+  let guard=0;
+  while(picked.length<want && guard<2000){
+    guard++;
+    const e=pickWeighted(entries);
+    const pi=Math.floor(Math.random()*6);
+    const key=e.v.inf+'|'+e.tense+'|'+pi;
+    if(seen.has(key)) continue;
+    seen.add(key);
+    picked.push(makeQuestion(e.v,e.tense,pi));
   }
   return picked;
 }
@@ -893,15 +1010,31 @@ function startQuiz(){
   roundTense = selectedTense==='mix'
     ? ALL_TENSES[Math.floor(Math.random()*ALL_TENSES.length)]
     : selectedTense;
+  reviewMode=false;
   questions=buildQuestions(roundTense);
+  beginRound();
+}
+
+function startReview(){
+  const qs=buildReviewQuestions();
+  if(!qs.length){ startQuiz(); return; }
+  reviewMode=true;
+  questions=qs;
+  beginRound();
+}
+
+function beginRound(){
+  quizLen=questions.length;
   qIndex=0; correctCount=0; wrongCount=0; streak=0; mistakes=[];
   showScreen('quiz'); loadQuestion();
 }
 
+function playAgain(){ if(reviewMode) startReview(); else startQuiz(); }
+
 function loadQuestion(){
   const q=questions[qIndex];
-  document.getElementById('prog-fill').style.width=`${(qIndex/QUIZ_LEN)*100}%`;
-  document.getElementById('prog-label').textContent=`${qIndex} / ${QUIZ_LEN}`;
+  document.getElementById('prog-fill').style.width=`${(qIndex/quizLen)*100}%`;
+  document.getElementById('prog-label').textContent=`${qIndex} / ${quizLen}`;
   document.getElementById('streak-num').textContent=streak;
   document.getElementById('tense-tag').textContent=TENSE_INFO[q.tense].label;
   document.getElementById('q-verb').textContent=q.verb;
@@ -929,6 +1062,7 @@ function checkAnswer(){
                 q.answer.normalize('NFC').toLowerCase();
   const accentOnly = !exact && normalize(val)===normalize(q.answer);
   const isRight = exact;
+  recordResult(q.verb,q.tense,isRight);
   inp.disabled=true;
   const fb=document.getElementById('feedback-box');
 
@@ -960,7 +1094,7 @@ function checkAnswer(){
   document.getElementById('streak-num').textContent=streak;
   const nb=document.getElementById('next-btn');
   nb.classList.add('visible');
-  nb.textContent=qIndex+1>=QUIZ_LEN?'Ver resultados →':'Siguiente →';
+  nb.textContent=qIndex+1>=quizLen?'Ver resultados →':'Siguiente →';
 
   setTimeout(()=>{
     const area=document.getElementById('quiz-card-area');
@@ -992,7 +1126,7 @@ function normalize(s){
 
 function nextQuestion(){
   qIndex++;
-  if(qIndex>=QUIZ_LEN){ showResults(); return; }
+  if(qIndex>=quizLen){ showResults(); return; }
   loadQuestion();
 }
 
@@ -1008,8 +1142,8 @@ function insertChar(c){
 
 // ════════════════ RESULTS ════════════════
 function showResults(){
-  const pct=Math.round((correctCount/QUIZ_LEN)*100);
-  totalAnswered+=QUIZ_LEN; totalCorrect+=correctCount;
+  const pct=Math.round((correctCount/quizLen)*100);
+  totalAnswered+=quizLen; totalCorrect+=correctCount;
   try{localStorage.setItem('conjugaes',JSON.stringify(
     {total:totalAnswered,correct:totalCorrect,streak:bestStreak}));}catch(e){}
   updateHomeStats();
@@ -1025,7 +1159,7 @@ function showResults(){
   document.getElementById('result-emoji').textContent=emojis;
   document.getElementById('result-title').textContent=titles;
   document.getElementById('result-sub').textContent=
-    `${TENSE_INFO[roundTense].short} · ${correctCount} de ${QUIZ_LEN} correctas · ${pct}%`;
+    `${reviewMode?'Repaso de errores':TENSE_INFO[roundTense].short} · ${correctCount} de ${quizLen} correctas · ${pct}%`;
   renderReview();
   document.getElementById('results').scrollTop=0;
   showScreen('results');
@@ -1065,6 +1199,7 @@ function updateHomeStats(){
 
 // ════════════════ NAVIGATION ════════════════
 function showScreen(id){
+  if(id==='home') renderWeakBox();
   document.querySelectorAll('.screen').forEach(s=>
     s.classList.toggle('hidden',s.id!==id));
 }
